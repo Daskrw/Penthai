@@ -24,6 +24,7 @@ import CommunityRegistration from "./pages/CommunityRegistration";
 import SellerRegistration from "./pages/SellerRegistration";
 import OurWork from "./pages/OurWork";
 import CommunitySupport from "./pages/CommunitySupport";
+import RegisterEnterprise from "./pages/RegisterEnterprise";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/seller-registration" element={<SellerRegistration />} />
               <Route path="/our-work" element={<OurWork />} />
               <Route path="/community-support" element={<CommunitySupport />} />
+              <Route path="/register-enterprise" element={<RegisterEnterprise />} />
               <Route path="/account" element={
                 <ProtectedRoute>
                   <Account />
