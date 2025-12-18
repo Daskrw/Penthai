@@ -34,9 +34,12 @@ const CheckStatus = () => {
         .from("community_enterprises")
         .select("enterprise_name, status, province")
         .or(`citizen_id.eq.${searchQuery},id.eq.${searchQuery}`)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) {
+      if (error) {
+        console.error("Search error:", error);
+        setNotFound(true);
+      } else if (!data) {
         setNotFound(true);
       } else {
         setResult(data as SearchResult);
