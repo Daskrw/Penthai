@@ -216,7 +216,14 @@ const AdminPortfolio = () => {
     }
 
     const imageUrl = await uploadImage();
+    
+    // Debug: Log the final URL being saved
+    console.log("=== Portfolio Submit Debug ===");
+    console.log("Image URL to save:", imageUrl);
+    console.log("Full URL check:", imageUrl?.startsWith("https://") ? "✅ Valid HTTPS URL" : "❌ Invalid URL");
+    
     const submitData = { ...formData, image_url: imageUrl || "" };
+    console.log("Submit data:", submitData);
 
     if (editingPost) {
       updateMutation.mutate({ ...submitData, id: editingPost.id });
