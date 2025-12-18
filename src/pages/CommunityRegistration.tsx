@@ -51,7 +51,7 @@ const serviceCards = [
 const stats = [
   { label: "วิสาหกิจชุมชนทั้งหมด", value: "1", icon: Building2 },
   { label: "สมาชิกเครือข่าย", value: "100+", icon: Users },
-  { label: "สินค้าในระบบ", value: "3,200+", icon: Package }
+  { label: "สินค้าในระบบ", value: "7+", icon: Package }
 ];
 
 const qualifications = [
