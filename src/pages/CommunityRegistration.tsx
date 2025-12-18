@@ -127,9 +127,34 @@ const CommunityRegistration = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-muted/50 to-background py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+      <section className="relative overflow-hidden py-16 md:py-24">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-primary/10 animate-gradient-shift" />
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-primary/10 animate-float"
+              style={{
+                width: `${60 + i * 20}px`,
+                height: `${60 + i * 20}px`,
+                left: `${10 + i * 15}%`,
+                top: `${20 + (i % 3) * 25}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${4 + i}s`,
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Glowing orbs */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 border border-primary/20">
             <Building2 className="w-4 h-4" />
             PENTHAI Community Enterprise
           </div>
@@ -140,7 +165,7 @@ const CommunityRegistration = () => {
             ยกระดับภูมิปัญญาท้องถิ่นสู่มาตรฐานสากล ด้วยระบบฐานข้อมูลที่เชื่อมโยงถึงกัน
           </p>
           <Link to="/register-enterprise">
-            <Button size="lg" className="font-semibold px-8">
+            <Button size="lg" className="font-semibold px-8 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow">
               เริ่มต้นจดทะเบียน
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
