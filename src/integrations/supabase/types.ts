@@ -137,6 +137,56 @@ export type Database = {
         }
         Relationships: []
       }
+      enterprise_renewals: {
+        Row: {
+          created_at: string
+          document_url: string | null
+          enterprise_id: string | null
+          enterprise_name: string
+          id: string
+          registration_id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_url?: string | null
+          enterprise_id?: string | null
+          enterprise_name: string
+          id?: string
+          registration_id: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_url?: string | null
+          enterprise_id?: string | null
+          enterprise_name?: string
+          id?: string
+          registration_id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enterprise_renewals_enterprise_id_fkey"
+            columns: ["enterprise_id"]
+            isOneToOne: false
+            referencedRelation: "community_enterprises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enterprise_settings: {
         Row: {
           announcement: string | null
