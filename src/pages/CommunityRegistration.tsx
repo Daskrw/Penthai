@@ -32,19 +32,19 @@ const serviceCards = [
     icon: Search,
     title: "ตรวจสอบสถานะ",
     description: "ติดตามผลการอนุมัติของคุณ",
-    href: "#"
+    href: "/check-status"
   },
   {
     icon: RefreshCw,
     title: "ต่ออายุทะเบียน",
     description: "ยื่นเรื่องต่ออายุประจำปี",
-    href: "#"
+    href: "/renew-registration"
   },
   {
     icon: FileText,
     title: "คู่มือ/เอกสาร",
     description: "ดาวน์โหลดแบบฟอร์มที่จำเป็น",
-    href: "#"
+    href: "/documents"
   }
 ];
 
