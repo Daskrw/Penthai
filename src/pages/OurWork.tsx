@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
-import { Calendar, X } from "lucide-react";
+import { Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,19 +99,24 @@ const OurWork = () => {
                 className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
                 onClick={() => setSelectedPost(post)}
               >
-                {/* Image */}
-                <AspectRatio ratio={16 / 9}>
+                {/* Image with lazy loading */}
+                <AspectRatio ratio={16 / 9} className="bg-muted">
                   {post.image_url ? (
                     <img
                       src={post.image_url}
                       alt={post.title}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        console.log("Image load error for:", post.image_url);
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center">
-                      <Calendar className="w-12 h-12 text-muted-foreground" />
-                    </div>
-                  )}
+                  ) : null}
+                  <div className={`w-full h-full bg-muted flex items-center justify-center absolute inset-0 ${post.image_url ? 'hidden' : ''}`}>
+                    <Calendar className="w-12 h-12 text-muted-foreground" />
+                  </div>
                 </AspectRatio>
 
                 <CardContent className="p-4">
@@ -168,10 +173,11 @@ const OurWork = () => {
 
               {/* Image */}
               {selectedPost.image_url && (
-                <AspectRatio ratio={16 / 9} className="rounded-lg overflow-hidden">
+                <AspectRatio ratio={16 / 9} className="rounded-lg overflow-hidden bg-muted">
                   <img
                     src={selectedPost.image_url}
                     alt={selectedPost.title}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 </AspectRatio>
