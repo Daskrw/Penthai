@@ -20,6 +20,10 @@ import Dashboard from "./pages/admin/Dashboard";
 import Orders from "./pages/admin/Orders";
 import Products from "./pages/admin/Products";
 import NotFound from "./pages/NotFound";
+import CommunityRegistration from "./pages/CommunityRegistration";
+import SellerRegistration from "./pages/SellerRegistration";
+import OurWork from "./pages/OurWork";
+import CommunitySupport from "./pages/CommunitySupport";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +52,10 @@ const App = () => (
               } />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/community-registration" element={<CommunityRegistration />} />
+              <Route path="/seller-registration" element={<SellerRegistration />} />
+              <Route path="/our-work" element={<OurWork />} />
+              <Route path="/community-support" element={<CommunitySupport />} />
               <Route path="/account" element={
                 <ProtectedRoute>
                   <Account />
