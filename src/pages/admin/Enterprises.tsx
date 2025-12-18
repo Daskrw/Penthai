@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Download, Search, Check, X, Clock, FileText, Users, Building } from "lucide-react";
+import { Eye, Download, Search, Check, X, Clock, FileText, Users, Building, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
@@ -67,6 +67,7 @@ const Enterprises = () => {
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -76,6 +77,39 @@ const Enterprises = () => {
 
   useEffect(() => {
     loadData();
+    
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('enterprise-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'community_enterprises'
+        },
+        (payload) => {
+          console.log('Real-time update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setEnterprises(prev => [payload.new as Enterprise, ...prev]);
+            toast.info("คำขอใหม่!", {
+              description: `${(payload.new as Enterprise).enterprise_name} ยื่นคำขอจดทะเบียน`,
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            setEnterprises(prev => 
+              prev.map(e => e.id === payload.new.id ? payload.new as Enterprise : e)
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setEnterprises(prev => prev.filter(e => e.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadData = async () => {
@@ -100,7 +134,14 @@ const Enterprises = () => {
       toast.error("ไม่สามารถโหลดข้อมูลได้");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    toast.success("รีเฟรชข้อมูลเรียบร้อยแล้ว");
   };
 
   const handleApprove = async () => {
@@ -228,6 +269,15 @@ const Enterprises = () => {
           <h1 className="text-3xl font-bold text-foreground">ทะเบียนวิสาหกิจชุมชน</h1>
           <p className="text-muted-foreground mt-1">จัดการคำขอจดทะเบียนและข้อมูลวิสาหกิจชุมชน</p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          รีเฟรช
+        </Button>
       </div>
 
       {/* Stats Cards */}
