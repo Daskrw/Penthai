@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,7 +7,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -16,6 +15,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   CheckCircle2, 
   FileText, 
@@ -25,7 +31,27 @@ import {
   EyeOff,
   Loader2
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+const thaiProvinces = [
+  "กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร",
+  "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท",
+  "ชัยภูมิ", "ชุมพร", "เชียงราย", "เชียงใหม่", "ตรัง",
+  "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม",
+  "นครราชสีมา", "นครศรีธรรมราช", "นครสวรรค์", "นนทบุรี", "นราธิวาส",
+  "น่าน", "บึงกาฬ", "บุรีรัมย์", "ปทุมธานี", "ประจวบคีรีขันธ์",
+  "ปราจีนบุรี", "ปัตตานี", "พระนครศรีอยุธยา", "พังงา", "พัทลุง",
+  "พิจิตร", "พิษณุโลก", "เพชรบุรี", "เพชรบูรณ์", "แพร่",
+  "พะเยา", "ภูเก็ต", "มหาสารคาม", "มุกดาหาร", "แม่ฮ่องสอน",
+  "ยโสธร", "ยะลา", "ร้อยเอ็ด", "ระนอง", "ระยอง",
+  "ราชบุรี", "ลพบุรี", "ลำปาง", "ลำพูน", "เลย",
+  "ศรีสะเกษ", "สกลนคร", "สงขลา", "สตูล", "สมุทรปราการ",
+  "สมุทรสงคราม", "สมุทรสาคร", "สระแก้ว", "สระบุรี", "สิงห์บุรี",
+  "สุโขทัย", "สุพรรณบุรี", "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย",
+  "หนองบัวลำภู", "อ่างทอง", "อุดรธานี", "อุทัยธานี", "อุตรดิตถ์",
+  "อุบลราชธานี", "อำนาจเจริญ"
+];
 
 const formSchema = z.object({
   citizenId: z
@@ -36,11 +62,18 @@ const formSchema = z.object({
     .string()
     .min(5, "กรุณากรอกชื่อ-นามสกุลให้ครบถ้วน")
     .max(100, "ชื่อยาวเกินไป"),
+  enterpriseName: z
+    .string()
+    .min(5, "กรุณากรอกชื่อวิสาหกิจชุมชน")
+    .max(200, "ชื่อยาวเกินไป"),
   phone: z
     .string()
     .min(9, "เบอร์โทรศัพท์ไม่ถูกต้อง")
     .max(10, "เบอร์โทรศัพท์ไม่ถูกต้อง")
     .regex(/^\d+$/, "กรุณากรอกเฉพาะตัวเลข"),
+  province: z
+    .string()
+    .min(1, "กรุณาเลือกจังหวัด"),
   password: z
     .string()
     .min(8, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร")
@@ -74,17 +107,19 @@ const requiredDocuments = [
 ];
 
 const RegisterEnterprise = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       citizenId: "",
       fullName: "",
+      enterpriseName: "",
       phone: "",
+      province: "",
       password: "",
       confirmPassword: "",
     },
@@ -93,16 +128,46 @@ const RegisterEnterprise = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "ลงทะเบียนสำเร็จ",
-      description: "ระบบจะนำท่านเข้าสู่กระบวนการยื่นเอกสารออนไลน์",
-    });
-    
-    setIsSubmitting(false);
-    form.reset();
+    try {
+      // Insert into community_enterprises table
+      const { error } = await supabase
+        .from("community_enterprises")
+        .insert({
+          citizen_id: data.citizenId,
+          full_name: data.fullName,
+          enterprise_name: data.enterpriseName,
+          phone: data.phone,
+          province: data.province,
+          status: "pending",
+        });
+
+      if (error) {
+        console.error("Error inserting registration:", error);
+        toast.error("เกิดข้อผิดพลาด", {
+          description: error.message || "ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง",
+        });
+        return;
+      }
+
+      toast.success("ลงทะเบียนสำเร็จ!", {
+        description: "คำขอของคุณถูกส่งเรียบร้อยแล้ว รอการตรวจสอบจากเจ้าหน้าที่",
+      });
+      
+      form.reset();
+      
+      // Redirect to community registration page after short delay
+      setTimeout(() => {
+        navigate("/community-registration");
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("เกิดข้อผิดพลาด", {
+        description: "ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -124,13 +189,34 @@ const RegisterEnterprise = () => {
                   ลงทะเบียนวิสาหกิจชุมชนใหม่
                 </h1>
                 <p className="text-muted-foreground">
-                  กรอกข้อมูลเบื้องต้นเพื่อเปิดบัญชีผู้ใช้งาน
+                  กรอกข้อมูลเบื้องต้นเพื่อยื่นคำขอจดทะเบียน
                 </p>
               </div>
 
               {/* Registration Form */}
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  {/* Enterprise Name */}
+                  <FormField
+                    control={form.control}
+                    name="enterpriseName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-foreground font-medium">
+                          ชื่อวิสาหกิจชุมชน
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="วิสาหกิจชุมชน..."
+                            className="h-12 bg-muted/50 border-border focus:border-primary focus:ring-primary"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   {/* Citizen ID */}
                   <FormField
                     control={form.control}
@@ -138,7 +224,7 @@ const RegisterEnterprise = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-foreground font-medium">
-                          เลขบัตรประชาชน
+                          เลขบัตรประชาชน (ผู้แทน)
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -160,7 +246,7 @@ const RegisterEnterprise = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-foreground font-medium">
-                          ชื่อ-นามสกุล
+                          ชื่อ-นามสกุล (ผู้แทน)
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -191,6 +277,34 @@ const RegisterEnterprise = () => {
                             {...field}
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Province */}
+                  <FormField
+                    control={form.control}
+                    name="province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-foreground font-medium">
+                          จังหวัด
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-12 bg-muted/50 border-border focus:border-primary focus:ring-primary">
+                              <SelectValue placeholder="เลือกจังหวัด" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-[300px]">
+                            {thaiProvinces.map((province) => (
+                              <SelectItem key={province} value={province}>
+                                {province}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -278,7 +392,7 @@ const RegisterEnterprise = () => {
                         กำลังดำเนินการ...
                       </>
                     ) : (
-                      "ลงทะเบียนและตรวจสอบสิทธิ์"
+                      "ยื่นคำขอจดทะเบียน"
                     )}
                   </Button>
                 </form>
