@@ -49,7 +49,7 @@ const serviceCards = [
 ];
 
 const stats = [
-  { label: "วิสาหกิจชุมชนทั้งหมด", value: "1,250+", icon: Building2 },
+  { label: "วิสาหกิจชุมชนทั้งหมด", value: "1", icon: Building2 },
   { label: "สมาชิกเครือข่าย", value: "8,500+", icon: Users },
   { label: "สินค้าในระบบ", value: "3,200+", icon: Package }
 ];
