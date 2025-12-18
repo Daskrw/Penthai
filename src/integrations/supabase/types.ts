@@ -137,6 +137,45 @@ export type Database = {
         }
         Relationships: []
       }
+      community_profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          image_url: string | null
+          name: string
+          phone: string | null
+          social_link: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          phone?: string | null
+          social_link?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          phone?: string | null
+          social_link?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       enterprise_renewals: {
         Row: {
           created_at: string
