@@ -79,9 +79,15 @@ const CommunityRegistration = () => {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             ระบบจดทะเบียนวิสาหกิจชุมชน
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             ยกระดับภูมิปัญญาท้องถิ่นสู่มาตรฐานสากล ด้วยระบบฐานข้อมูลที่เชื่อมโยงถึงกัน
           </p>
+          <Link to="/register-enterprise">
+            <Button size="lg" className="font-semibold px-8">
+              เริ่มต้นจดทะเบียน
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
 
