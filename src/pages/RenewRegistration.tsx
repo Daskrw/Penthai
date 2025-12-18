@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, RefreshCw, Upload, CheckCircle2, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const RenewRegistration = () => {
   const [loading, setLoading] = useState(false);
@@ -33,12 +34,57 @@ const RenewRegistration = () => {
 
     setLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setLoading(false);
-    setSubmitted(true);
-    toast.success("ส่งคำขอต่ออายุเรียบร้อยแล้ว");
+    try {
+      let documentUrl = null;
+
+      // Upload file if provided
+      if (formData.file) {
+        const fileExt = formData.file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `renewals/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('payment-slips')
+          .upload(filePath, formData.file);
+
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          // Continue without document - not critical
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('payment-slips')
+            .getPublicUrl(filePath);
+          documentUrl = urlData.publicUrl;
+        }
+      }
+
+      // Get current user if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Insert renewal request
+      const { error } = await supabase
+        .from("enterprise_renewals")
+        .insert({
+          registration_id: formData.registrationId.trim(),
+          enterprise_name: formData.enterpriseName.trim(),
+          document_url: documentUrl,
+          user_id: user?.id || null,
+          status: "pending"
+        });
+
+      if (error) {
+        console.error("Insert error:", error);
+        throw error;
+      }
+
+      setSubmitted(true);
+      toast.success("ส่งคำขอต่ออายุเรียบร้อยแล้ว");
+    } catch (error) {
+      console.error("Error submitting renewal:", error);
+      toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {

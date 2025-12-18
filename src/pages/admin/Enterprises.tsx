@@ -56,6 +56,17 @@ interface Enterprise {
   approved_at: string | null;
 }
 
+interface Renewal {
+  id: string;
+  registration_id: string;
+  enterprise_name: string;
+  document_url: string | null;
+  status: string;
+  rejection_reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
 interface Settings {
   id: string;
   registration_open: boolean;
@@ -65,6 +76,7 @@ interface Settings {
 
 const Enterprises = () => {
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
+  const [renewals, setRenewals] = useState<Renewal[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -78,8 +90,8 @@ const Enterprises = () => {
   useEffect(() => {
     loadData();
     
-    // Set up real-time subscription
-    const channel = supabase
+    // Set up real-time subscription for enterprises
+    const enterpriseChannel = supabase
       .channel('enterprise-changes')
       .on(
         'postgres_changes',
@@ -107,17 +119,51 @@ const Enterprises = () => {
       )
       .subscribe();
 
+    // Set up real-time subscription for renewals
+    const renewalChannel = supabase
+      .channel('renewal-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'enterprise_renewals'
+        },
+        (payload) => {
+          console.log('Renewal update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setRenewals(prev => [payload.new as Renewal, ...prev]);
+            toast.info("คำขอต่ออายุใหม่!", {
+              description: `${(payload.new as Renewal).enterprise_name}`,
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            setRenewals(prev => 
+              prev.map(r => r.id === payload.new.id ? payload.new as Renewal : r)
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setRenewals(prev => prev.filter(r => r.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(enterpriseChannel);
+      supabase.removeChannel(renewalChannel);
     };
   }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [enterprisesRes, settingsRes] = await Promise.all([
+      const [enterprisesRes, renewalsRes, settingsRes] = await Promise.all([
         supabase
           .from("community_enterprises")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("enterprise_renewals")
           .select("*")
           .order("created_at", { ascending: false }),
         supabase.from("enterprise_settings").select("*").single(),
@@ -125,6 +171,9 @@ const Enterprises = () => {
 
       if (enterprisesRes.data) {
         setEnterprises(enterprisesRes.data as Enterprise[]);
+      }
+      if (renewalsRes.data) {
+        setRenewals(renewalsRes.data as Renewal[]);
       }
       if (settingsRes.data) {
         setSettings(settingsRes.data as Settings);
@@ -214,6 +263,52 @@ const Enterprises = () => {
       toast.error("เกิดข้อผิดพลาดในการบันทึก");
     }
   };
+
+  const handleApproveRenewal = async (renewal: Renewal) => {
+    try {
+      const { error } = await supabase
+        .from("enterprise_renewals")
+        .update({
+          status: "approved",
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", renewal.id);
+
+      if (error) throw error;
+      toast.success("อนุมัติการต่ออายุเรียบร้อยแล้ว");
+      loadData();
+    } catch (error) {
+      console.error("Error approving renewal:", error);
+      toast.error("เกิดข้อผิดพลาด");
+    }
+  };
+
+  const handleRejectRenewal = async (renewal: Renewal, reason: string) => {
+    if (!reason.trim()) {
+      toast.error("กรุณาระบุเหตุผล");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("enterprise_renewals")
+        .update({
+          status: "rejected",
+          rejection_reason: reason,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", renewal.id);
+
+      if (error) throw error;
+      toast.success("ปฏิเสธการต่ออายุเรียบร้อยแล้ว");
+      loadData();
+    } catch (error) {
+      console.error("Error rejecting renewal:", error);
+      toast.error("เกิดข้อผิดพลาด");
+    }
+  };
+
+  const pendingRenewals = renewals.filter(r => r.status === "pending");
 
   const getStatusBadge = (status: EnterpriseStatus) => {
     switch (status) {
@@ -337,13 +432,22 @@ const Enterprises = () => {
       </div>
 
       <Tabs defaultValue="pending" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
           <TabsTrigger value="pending" className="gap-2">
             <Clock className="w-4 h-4" />
-            คำขอรอตรวจสอบ
+            คำขอจดทะเบียน
             {stats.pending > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {stats.pending}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="renewals" className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            คำขอต่ออายุ
+            {pendingRenewals.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {pendingRenewals.length}
               </Badge>
             )}
           </TabsTrigger>
@@ -508,6 +612,107 @@ const Enterprises = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Renewals */}
+        <TabsContent value="renewals">
+          <Card>
+            <CardHeader>
+              <CardTitle>คำขอต่ออายุทะเบียน</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renewals.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <RefreshCw className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>ยังไม่มีคำขอต่ออายุ</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>วันที่ยื่น</TableHead>
+                      <TableHead>รหัสทะเบียน</TableHead>
+                      <TableHead>ชื่อวิสาหกิจ</TableHead>
+                      <TableHead>เอกสาร</TableHead>
+                      <TableHead>สถานะ</TableHead>
+                      <TableHead className="text-right">ดำเนินการ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {renewals.map((renewal) => (
+                      <TableRow key={renewal.id}>
+                        <TableCell>
+                          {format(new Date(renewal.created_at), "d MMM yyyy", { locale: th })}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">{renewal.registration_id}</TableCell>
+                        <TableCell className="font-medium">{renewal.enterprise_name}</TableCell>
+                        <TableCell>
+                          {renewal.document_url ? (
+                            <a
+                              href={renewal.document_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline inline-flex items-center gap-1"
+                            >
+                              <FileText className="w-4 h-4" />
+                              ดูเอกสาร
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">ไม่มี</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {renewal.status === "pending" ? (
+                            <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                              <Clock className="w-3 h-3 mr-1" />
+                              รอตรวจสอบ
+                            </Badge>
+                          ) : renewal.status === "approved" ? (
+                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                              <Check className="w-3 h-3 mr-1" />
+                              อนุมัติ
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+                              <X className="w-3 h-3 mr-1" />
+                              ปฏิเสธ
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {renewal.status === "pending" && (
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                onClick={() => handleApproveRenewal(renewal)}
+                              >
+                                <Check className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                  const reason = prompt("กรุณาระบุเหตุผลในการปฏิเสธ:");
+                                  if (reason) {
+                                    handleRejectRenewal(renewal, reason);
+                                  }
+                                }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
