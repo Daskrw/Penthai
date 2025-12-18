@@ -25,25 +25,25 @@ const activities = [
 
 const ActivityNavigation = () => {
   return (
-    <section className="py-12 bg-background">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {activities.map((activity) => (
             <Link
               key={activity.href}
               to={activity.href}
-              className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-thai-lg transition-all duration-300 hover-lift"
+              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]"
             >
-              <div className="aspect-[4/3] overflow-hidden">
+              <div className="aspect-video overflow-hidden">
                 <img
                   src={activity.image}
                   alt={activity.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="text-white text-sm md:text-base lg:text-lg font-semibold text-center">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <h3 className="text-white text-lg md:text-xl lg:text-2xl font-bold text-center">
                   {activity.title}
                 </h3>
               </div>
