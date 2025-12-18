@@ -22,7 +22,7 @@ const serviceCards = [
     icon: UserPlus,
     title: "จดทะเบียนใหม่",
     description: "สำหรับกลุ่มที่ยังไม่เคยจดทะเบียน",
-    href: "/seller-registration"
+    href: "/register-enterprise"
   },
   {
     icon: Search,
@@ -228,7 +228,7 @@ const CommunityRegistration = () => {
                   ))}
                 </ul>
                 <div className="mt-8 pt-6 border-t border-primary/20">
-                  <Link to="/seller-registration">
+                  <Link to="/register-enterprise">
                     <Button size="lg" className="w-full sm:w-auto font-semibold">
                       เริ่มต้นจดทะเบียน
                       <ArrowRight className="w-4 h-4 ml-2" />
