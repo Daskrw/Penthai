@@ -1,242 +1,230 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
-  UserPlus, 
-  Search, 
-  RefreshCw, 
-  FileText, 
-  MapPin, 
-  Users, 
-  Package, 
-  Building2,
   CheckCircle2,
-  ArrowRight
+  FileText,
+  CreditCard,
+  BookOpen,
+  Users,
+  ClipboardCheck,
+  Award,
+  Search,
+  LogIn
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const serviceCards = [
-  {
-    icon: UserPlus,
-    title: "จดทะเบียนใหม่",
-    description: "สำหรับกลุ่มที่ยังไม่เคยจดทะเบียน",
-    href: "/seller-registration"
-  },
-  {
-    icon: Search,
-    title: "ตรวจสอบสถานะ",
-    description: "ติดตามผลการอนุมัติของคุณ",
-    href: "#"
-  },
-  {
-    icon: RefreshCw,
-    title: "ต่ออายุทะเบียน",
-    description: "ยื่นเรื่องต่ออายุประจำปี",
-    href: "#"
-  },
-  {
-    icon: FileText,
-    title: "คู่มือ/เอกสาร",
-    description: "ดาวน์โหลดแบบฟอร์มที่จำเป็น",
-    href: "#"
-  }
-];
-
-const stats = [
-  { label: "วิสาหกิจชุมชนทั้งหมด", value: "1,250+", icon: Building2 },
-  { label: "สมาชิกเครือข่าย", value: "8,500+", icon: Users },
-  { label: "สินค้าในระบบ", value: "3,200+", icon: Package }
-];
-
 const qualifications = [
-  "มีสมาชิกไม่น้อยกว่า 7 คน และไม่อยู่ในครอบครัวเดียวกัน",
-  "ดำเนินกิจการร่วมกันโดยมีวัตถุประสงค์เพื่อสร้างรายได้",
-  "มีที่ตั้งสำนักงานแน่นอน สามารถติดต่อได้",
-  "จดทะเบียนต่อนายทะเบียนในพื้นที่"
+  "คณะบุคคลตั้งแต่ 7 คนขึ้นไป",
+  "ไม่อยู่ในครอบครัวเดียวกัน",
+  "มีวัตถุประสงค์เพื่อสร้างรายได้และพึ่งพาตนเอง"
 ];
 
-const recentRegistrations = [
-  { name: "วิสาหกิจชุมชนกลุ่มแม่บ้านทอผ้า", location: "จ.เชียงใหม่", status: "อนุมัติแล้ว" },
-  { name: "วิสาหกิจชุมชนผลิตภัณฑ์สมุนไพร", location: "จ.นครราชสีมา", status: "รอตรวจสอบ" },
-  { name: "วิสาหกิจชุมชนเกษตรอินทรีย์", location: "จ.อุบลราชธานี", status: "อนุมัติแล้ว" },
-  { name: "วิสาหกิจชุมชนหัตถกรรมพื้นบ้าน", location: "จ.ลำพูน", status: "อนุมัติแล้ว" }
+const requiredDocuments = [
+  { icon: CreditCard, title: "สำเนาบัตรประชาชน" },
+  { icon: BookOpen, title: "ทะเบียนบ้าน" },
+  { icon: FileText, title: "หนังสือมอบอำนาจ" },
+  { icon: Users, title: "ข้อบังคับกลุ่ม" }
+];
+
+const processSteps = [
+  { step: 1, title: "ยื่นคำขอ", subtitle: "Submit", icon: FileText },
+  { step: 2, title: "เจ้าหน้าที่ตรวจสอบ", subtitle: "Verify", icon: ClipboardCheck },
+  { step: 3, title: "อนุมัติ/ออกใบสำคัญ", subtitle: "Approve", icon: Award }
 ];
 
 const CommunityRegistration = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background font-[Kanit]">
       <Navbar />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-muted/50 to-background py-16 md:py-24">
+      <section className="bg-background py-12 md:py-16 border-b border-border">
         <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Building2 className="w-4 h-4" />
-            PENTHAI Community Enterprise
-          </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
             ระบบจดทะเบียนวิสาหกิจชุมชน
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             ยกระดับภูมิปัญญาท้องถิ่นสู่มาตรฐานสากล ด้วยระบบฐานข้อมูลที่เชื่อมโยงถึงกัน
           </p>
         </div>
       </section>
 
-      {/* Service Dashboard */}
-      <section className="py-12 md:py-16 bg-background">
+      {/* Main Content - 2 Column Layout */}
+      <section className="py-10 md:py-14 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {serviceCards.map((service) => (
-              <Link key={service.title} to={service.href}>
-                <Card className="group h-full border-2 border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300 cursor-pointer">
-                  <CardContent className="p-6 md:p-8 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                      <service.icon className="w-8 h-8 text-primary group-hover:text-primary-foreground transition-colors" />
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {service.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {service.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Bar */}
-      <section className="py-10 bg-primary">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex items-center justify-center gap-4 text-primary-foreground">
-                <div className="w-12 h-12 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
-                  <stat.icon className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="text-2xl md:text-3xl font-bold">{stat.value}</div>
-                  <div className="text-sm text-primary-foreground/80">{stat.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Search & Map Preview Section */}
-      <section className="py-12 md:py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mb-8">
-              ค้นหาวิสาหกิจชุมชน / เครือข่าย
-            </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Search Bar */}
-            <div className="flex gap-3 mb-10">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input 
-                  placeholder="ค้นหาชื่อวิสาหกิจ, จังหวัด, หรือประเภทสินค้า..." 
-                  className="pl-12 h-14 text-base border-2 focus:border-primary"
-                />
-              </div>
-              <Button size="lg" className="h-14 px-8 font-semibold">
-                ค้นหา
-              </Button>
-            </div>
-
-            {/* Map Placeholder & Recent Registrations */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Map Placeholder */}
-              <Card className="overflow-hidden">
-                <div className="aspect-[4/3] bg-gradient-to-br from-muted to-muted/50 flex flex-col items-center justify-center p-8">
-                  <MapPin className="w-16 h-16 text-primary/30 mb-4" />
-                  <p className="text-muted-foreground text-center font-medium">
-                    แผนที่แสดงที่ตั้งวิสาหกิจชุมชน
-                  </p>
-                  <p className="text-sm text-muted-foreground/70 text-center mt-1">
-                    เลือกจังหวัดเพื่อดูรายละเอียด
-                  </p>
-                </div>
+            {/* Column A: Main Information (Left - Wider) */}
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* Section 1: Qualifications */}
+              <Card className="shadow-lg border-0">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-primary flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    คุณสมบัติของวิสาหกิจชุมชน
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-4">
+                    {qualifications.map((item, index) => (
+                      <li key={index} className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                        <span className="text-foreground">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
               </Card>
 
-              {/* Recent Registrations */}
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4 text-primary" />
-                    การจดทะเบียนล่าสุด
-                  </h3>
-                  <div className="space-y-3">
-                    {recentRegistrations.map((item, index) => (
+              {/* Section 2: Required Documents */}
+              <Card className="shadow-lg border-0">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-primary flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-primary" />
+                    </div>
+                    เอกสารที่ต้องเตรียม
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {requiredDocuments.map((doc, index) => (
                       <div 
                         key={index} 
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        className="flex flex-col items-center p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground text-sm truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3" />
-                            {item.location}
-                          </p>
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                          <doc.icon className="w-6 h-6 text-primary" />
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          item.status === "อนุมัติแล้ว" 
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                        }`}>
-                          {item.status}
+                        <span className="text-sm font-medium text-foreground text-center">
+                          {doc.title}
                         </span>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Qualifications Section */}
-      <section className="py-12 md:py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <Card className="border-2 border-primary/20 bg-primary/5">
-              <CardContent className="p-8">
-                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  คุณสมบัติเบื้องต้น
-                </h2>
-                <ul className="space-y-4">
-                  {qualifications.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-primary font-bold text-sm">{index + 1}</span>
+              {/* Section 3: Process Timeline */}
+              <Card className="shadow-lg border-0">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold text-primary flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <ClipboardCheck className="w-5 h-5 text-primary" />
+                    </div>
+                    ขั้นตอนการดำเนินการ
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    {processSteps.map((step, index) => (
+                      <div key={step.step} className="flex items-center gap-4 flex-1 w-full md:w-auto">
+                        <div className="flex flex-col items-center text-center flex-1">
+                          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mb-3 shadow-lg">
+                            <step.icon className="w-7 h-7 text-primary-foreground" />
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                            <span className="text-primary font-bold">{step.step}</span>
+                          </div>
+                          <h4 className="font-semibold text-foreground">{step.title}</h4>
+                          <span className="text-sm text-muted-foreground">{step.subtitle}</span>
+                        </div>
+                        {index < processSteps.length - 1 && (
+                          <div className="hidden md:block w-16 h-1 bg-primary/30 rounded-full flex-shrink-0" />
+                        )}
                       </div>
-                      <span className="text-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-8 pt-6 border-t border-primary/20">
-                  <Link to="/seller-registration">
-                    <Button size="lg" className="w-full sm:w-auto font-semibold">
-                      เริ่มต้นจดทะเบียน
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Column B: Action & Login (Right - Narrower, Sticky) */}
+            <div className="lg:col-span-1">
+              <div className="lg:sticky lg:top-24 space-y-6">
+                
+                {/* Card 1: Login/Register */}
+                <Card className="shadow-xl border-0 overflow-hidden">
+                  <div className="bg-primary px-6 py-4">
+                    <h3 className="text-lg font-bold text-primary-foreground flex items-center gap-2">
+                      <LogIn className="w-5 h-5" />
+                      เข้าสู่ระบบ / ลงทะเบียน
+                    </h3>
+                  </div>
+                  <CardContent className="p-6 space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">ชื่อผู้ใช้</label>
+                      <Input 
+                        placeholder="กรอกชื่อผู้ใช้" 
+                        className="h-11 border-2 focus:border-primary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">รหัสผ่าน</label>
+                      <Input 
+                        type="password"
+                        placeholder="กรอกรหัสผ่าน" 
+                        className="h-11 border-2 focus:border-primary"
+                      />
+                    </div>
+                    <Button className="w-full h-11 font-semibold text-base">
+                      เข้าสู่ระบบ
                     </Button>
-                  </Link>
+                    <Link to="/seller-registration" className="block">
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-11 font-semibold text-base border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                      >
+                        ลงทะเบียนวิสาหกิจใหม่
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-muted-foreground text-center pt-2">
+                      ลืมรหัสผ่าน? <a href="#" className="text-primary hover:underline">กดที่นี่</a>
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Card 2: Check Status */}
+                <Card className="shadow-xl border-0 overflow-hidden">
+                  <div className="bg-muted px-6 py-4 border-b border-border">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <Search className="w-5 h-5 text-primary" />
+                      ตรวจสอบสถานะการยื่น
+                    </h3>
+                  </div>
+                  <CardContent className="p-6 space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">เลขที่คำขอ / รหัสกลุ่ม</label>
+                      <Input 
+                        placeholder="เช่น CE-2024-XXXXX" 
+                        className="h-11 border-2 focus:border-primary"
+                      />
+                    </div>
+                    <Button 
+                      variant="secondary" 
+                      className="w-full h-11 font-semibold text-base"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      ค้นหา
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Contact Info */}
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="text-sm text-foreground font-medium mb-1">ต้องการความช่วยเหลือ?</p>
+                  <p className="text-xs text-muted-foreground">
+                    ติดต่อเจ้าหน้าที่ได้ที่ 02-XXX-XXXX หรือ <a href="mailto:support@penthai.com" className="text-primary hover:underline">support@penthai.com</a>
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
