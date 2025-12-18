@@ -25,8 +25,8 @@ const Navbar = () => {
       </div>
 
       {/* Main Navigation */}
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <img src={penthaiLogo} alt="PENTHAI Logo" className="h-10 w-auto" />
