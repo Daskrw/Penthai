@@ -22,6 +22,7 @@ import Products from "./pages/admin/Products";
 import Enterprises from "./pages/admin/Enterprises";
 import SellerRequests from "./pages/admin/SellerRequests";
 import AdminPortfolio from "./pages/admin/Portfolio";
+import AdminCommunities from "./pages/admin/Communities";
 import NotFound from "./pages/NotFound";
 import CommunityRegistration from "./pages/CommunityRegistration";
 import SellerRegistration from "./pages/SellerRegistration";
@@ -85,6 +86,7 @@ const App = () => (
                 <Route path="enterprises" element={<Enterprises />} />
                 <Route path="seller-requests" element={<SellerRequests />} />
                 <Route path="portfolio" element={<AdminPortfolio />} />
+                <Route path="communities" element={<AdminCommunities />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

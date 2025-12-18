@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ClipboardCheck, Home, Store, Newspaper } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ClipboardCheck, Home, Store, Newspaper, Users } from "lucide-react";
 
 const AdminLayout = () => {
   const { signOut } = useAuth();
@@ -75,6 +75,16 @@ const AdminLayout = () => {
             >
               <Newspaper className="mr-2 h-4 w-4" />
               จัดการผลงาน/ข่าวสาร
+            </Button>
+          </Link>
+          
+          <Link to="/admin/communities">
+            <Button
+              variant={isActive("/admin/communities") ? "secondary" : "ghost"}
+              className="w-full justify-start"
+            >
+              <Users className="mr-2 h-4 w-4" />
+              ข้อมูลชุมชน
             </Button>
           </Link>
         </nav>
