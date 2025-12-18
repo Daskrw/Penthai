@@ -77,6 +77,93 @@ export type Database = {
           },
         ]
       }
+      community_enterprises: {
+        Row: {
+          address: string | null
+          approved_at: string | null
+          approved_by: string | null
+          citizen_id: string
+          created_at: string
+          district: string | null
+          documents: Json | null
+          enterprise_name: string
+          full_name: string
+          id: string
+          member_count: number | null
+          phone: string
+          province: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["enterprise_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          citizen_id: string
+          created_at?: string
+          district?: string | null
+          documents?: Json | null
+          enterprise_name: string
+          full_name: string
+          id?: string
+          member_count?: number | null
+          phone: string
+          province: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["enterprise_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          citizen_id?: string
+          created_at?: string
+          district?: string | null
+          documents?: Json | null
+          enterprise_name?: string
+          full_name?: string
+          id?: string
+          member_count?: number | null
+          phone?: string
+          province?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["enterprise_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      enterprise_settings: {
+        Row: {
+          announcement: string | null
+          id: string
+          notification_email: string | null
+          registration_open: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          announcement?: string | null
+          id?: string
+          notification_email?: string | null
+          registration_open?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          announcement?: string | null
+          id?: string
+          notification_email?: string | null
+          registration_open?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -283,6 +370,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      enterprise_status: "pending" | "approved" | "rejected"
       order_status: "pending" | "paid" | "shipped" | "delivered" | "cancelled"
       payment_method: "promptpay" | "kbank" | "cash_on_delivery"
       product_type: "consumer" | "consumable"
@@ -414,6 +502,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      enterprise_status: ["pending", "approved", "rejected"],
       order_status: ["pending", "paid", "shipped", "delivered", "cancelled"],
       payment_method: ["promptpay", "kbank", "cash_on_delivery"],
       product_type: ["consumer", "consumable"],
