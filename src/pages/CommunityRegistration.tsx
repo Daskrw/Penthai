@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   UserPlus, 
   Search, 
@@ -13,9 +15,11 @@ import {
   Package, 
   Building2,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const serviceCards = [
   {
@@ -57,14 +61,67 @@ const qualifications = [
   "จดทะเบียนต่อนายทะเบียนในพื้นที่"
 ];
 
-const recentRegistrations = [
-  { name: "วิสาหกิจชุมชนกลุ่มแม่บ้านทอผ้า", location: "จ.เชียงใหม่", status: "อนุมัติแล้ว" },
-  { name: "วิสาหกิจชุมชนผลิตภัณฑ์สมุนไพร", location: "จ.นครราชสีมา", status: "รอตรวจสอบ" },
-  { name: "วิสาหกิจชุมชนเกษตรอินทรีย์", location: "จ.อุบลราชธานี", status: "อนุมัติแล้ว" },
-  { name: "วิสาหกิจชุมชนหัตถกรรมพื้นบ้าน", location: "จ.ลำพูน", status: "อนุมัติแล้ว" }
-];
+interface RecentRegistration {
+  id: string;
+  enterprise_name: string;
+  province: string;
+  status: "pending" | "approved" | "rejected";
+}
 
 const CommunityRegistration = () => {
+  const [recentRegistrations, setRecentRegistrations] = useState<RecentRegistration[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRecentRegistrations();
+  }, []);
+
+  const fetchRecentRegistrations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("community_enterprises")
+        .select("id, enterprise_name, province, status")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error("Error fetching registrations:", error);
+        return;
+      }
+
+      setRecentRegistrations(data as RecentRegistration[]);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case "approved":
+        return {
+          text: "อนุมัติแล้ว",
+          className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+        };
+      case "pending":
+        return {
+          text: "รอตรวจสอบ",
+          className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+        };
+      case "rejected":
+        return {
+          text: "ไม่อนุมัติ",
+          className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+        };
+      default:
+        return {
+          text: status,
+          className: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+        };
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -180,29 +237,53 @@ const CommunityRegistration = () => {
                     การจดทะเบียนล่าสุด
                   </h3>
                   <div className="space-y-3">
-                    {recentRegistrations.map((item, index) => (
-                      <div 
-                        key={index} 
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground text-sm truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3" />
-                            {item.location}
-                          </p>
+                    {loading ? (
+                      // Loading skeletons
+                      Array.from({ length: 4 }).map((_, index) => (
+                        <div 
+                          key={index} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        >
+                          <div className="flex-1 space-y-2">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/3" />
+                          </div>
+                          <Skeleton className="h-6 w-20 rounded-full" />
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          item.status === "อนุมัติแล้ว" 
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                        }`}>
-                          {item.status}
-                        </span>
+                      ))
+                    ) : recentRegistrations.length === 0 ? (
+                      // Empty state
+                      <div className="text-center py-8">
+                        <Building2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                        <p className="text-muted-foreground text-sm">
+                          ยังไม่มีรายการจดทะเบียนล่าสุด
+                        </p>
                       </div>
-                    ))}
+                    ) : (
+                      // Data list
+                      recentRegistrations.map((item) => {
+                        const statusDisplay = getStatusDisplay(item.status);
+                        return (
+                          <div 
+                            key={item.id} 
+                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground text-sm truncate">
+                                {item.enterprise_name}
+                              </p>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3" />
+                                จ.{item.province}
+                              </p>
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusDisplay.className}`}>
+                              {statusDisplay.text}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </CardContent>
               </Card>
