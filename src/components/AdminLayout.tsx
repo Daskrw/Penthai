@@ -12,12 +12,12 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-card border-r border-border">
+      <aside className="w-64 bg-card border-r border-border flex flex-col">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-primary">PenThai Admin</h1>
         </div>
         
-        <nav className="px-4 space-y-2">
+        <nav className="px-4 space-y-2 flex-1">
           <Link to="/admin">
             <Button
               variant={isActive("/admin") ? "secondary" : "ghost"}
@@ -59,7 +59,7 @@ const AdminLayout = () => {
           </Link>
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+        <div className="p-4 border-t border-border">
           <Button
             variant="ghost"
             className="w-full justify-start"
