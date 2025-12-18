@@ -313,6 +313,42 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_posts: {
+        Row: {
+          content: string
+          created_at: string
+          event_date: string
+          id: string
+          image_url: string | null
+          is_published: boolean
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          event_date: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          event_date?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string
