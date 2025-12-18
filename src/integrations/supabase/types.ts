@@ -379,6 +379,72 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_applications: {
+        Row: {
+          admin_notes: string | null
+          category: string | null
+          certifications: Json | null
+          contact_name: string
+          created_at: string
+          description: string | null
+          id: string
+          line_id: string | null
+          other_certification: string | null
+          phone: string
+          price: number | null
+          product_images: Json | null
+          product_name: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          shop_name: string
+          status: Database["public"]["Enums"]["seller_application_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category?: string | null
+          certifications?: Json | null
+          contact_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          line_id?: string | null
+          other_certification?: string | null
+          phone: string
+          price?: number | null
+          product_images?: Json | null
+          product_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shop_name: string
+          status?: Database["public"]["Enums"]["seller_application_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string | null
+          certifications?: Json | null
+          contact_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          line_id?: string | null
+          other_certification?: string | null
+          phone?: string
+          price?: number | null
+          product_images?: Json | null
+          product_name?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shop_name?: string
+          status?: Database["public"]["Enums"]["seller_application_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -424,6 +490,11 @@ export type Database = {
       order_status: "pending" | "paid" | "shipped" | "delivered" | "cancelled"
       payment_method: "promptpay" | "kbank" | "cash_on_delivery"
       product_type: "consumer" | "consumable"
+      seller_application_status:
+        | "pending"
+        | "contacted"
+        | "approved"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -556,6 +627,12 @@ export const Constants = {
       order_status: ["pending", "paid", "shipped", "delivered", "cancelled"],
       payment_method: ["promptpay", "kbank", "cash_on_delivery"],
       product_type: ["consumer", "consumable"],
+      seller_application_status: [
+        "pending",
+        "contacted",
+        "approved",
+        "rejected",
+      ],
     },
   },
 } as const
