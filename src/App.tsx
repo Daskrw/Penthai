@@ -2,38 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminLayout from "./components/AdminLayout";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Shop from "./pages/Shop";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Account from "./pages/Account";
-import Dashboard from "./pages/admin/Dashboard";
-import Orders from "./pages/admin/Orders";
-import Products from "./pages/admin/Products";
-import Enterprises from "./pages/admin/Enterprises";
-import SellerRequests from "./pages/admin/SellerRequests";
-import AdminPortfolio from "./pages/admin/Portfolio";
-import AdminCommunities from "./pages/admin/Communities";
-import AdminReviews from "./pages/admin/Reviews";
-import NotFound from "./pages/NotFound";
-import CommunityRegistration from "./pages/CommunityRegistration";
-import SellerRegistration from "./pages/SellerRegistration";
-import OurWork from "./pages/OurWork";
-import CommunitySupport from "./pages/CommunitySupport";
-import Reviews from "./pages/Reviews";
-import RegisterEnterprise from "./pages/RegisterEnterprise";
-import CheckStatus from "./pages/CheckStatus";
-import RenewRegistration from "./pages/RenewRegistration";
-import Documents from "./pages/Documents";
+import AnimatedRoutes from "./components/AnimatedRoutes";
 
 const queryClient = new QueryClient();
 
@@ -45,57 +17,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              } />
-              <Route path="/order-success" element={
-                <ProtectedRoute>
-                  <OrderSuccess />
-                </ProtectedRoute>
-              } />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/community-registration" element={<CommunityRegistration />} />
-              <Route path="/seller-registration" element={<SellerRegistration />} />
-              <Route path="/our-work" element={<OurWork />} />
-              <Route path="/community-support" element={<CommunitySupport />} />
-              <Route path="/register-enterprise" element={<RegisterEnterprise />} />
-              <Route path="/check-status" element={<CheckStatus />} />
-              <Route path="/renew-registration" element={<RenewRegistration />} />
-              <Route path="/documents" element={<Documents />} />
-              <Route path="/reviews" element={<Reviews />} />
-              <Route path="/account" element={
-                <ProtectedRoute>
-                  <Account />
-                </ProtectedRoute>
-              } />
-              
-              {/* Admin Routes */}
-              <Route path="/admin" element={
-                <ProtectedRoute requireAdmin>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Dashboard />} />
-                <Route path="orders" element={<Orders />} />
-                <Route path="products" element={<Products />} />
-                <Route path="enterprises" element={<Enterprises />} />
-                <Route path="seller-requests" element={<SellerRequests />} />
-                <Route path="portfolio" element={<AdminPortfolio />} />
-                <Route path="communities" element={<AdminCommunities />} />
-                <Route path="reviews" element={<AdminReviews />} />
-              </Route>
-
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AnimatedRoutes />
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
