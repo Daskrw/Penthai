@@ -97,32 +97,26 @@ const UserManagement = () => {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // Create user via Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.fullName,
-          },
+      // Call edge function to create user
+      const { data: result, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+          role: data.role,
+          communityId: data.role === "community_admin" && data.communityId ? data.communityId : null,
         },
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Failed to create user");
+      if (error) {
+        throw new Error(error.message || "Failed to create user");
+      }
 
-      // Add role
-      const roleData = {
-        user_id: authData.user.id,
-        role: data.role as 'admin' | 'community_admin' | 'user',
-        community_id: data.role === "community_admin" && data.communityId ? data.communityId : null,
-      };
+      if (result?.error) {
+        throw new Error(result.error);
+      }
 
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert(roleData);
-
-      if (roleError) throw roleError;
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-user-roles"] });
