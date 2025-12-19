@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Clock, Truck, Ban, Package, ShoppingBag } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import AddressManagement from "@/components/account/AddressManagement";
-import PaymentMethodManagement from "@/components/account/PaymentMethodManagement";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -188,9 +187,8 @@ const Account = () => {
             </div>
 
             {/* Additional Info Cards */}
-            <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <div className="mt-6">
               <AddressManagement />
-              <PaymentMethodManagement />
             </div>
           </div>
         </div>
