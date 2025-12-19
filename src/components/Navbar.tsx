@@ -34,17 +34,17 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-foreground hover:text-primary transition-colors">
+          <div className="hidden md:flex items-center space-x-10 lg:space-x-12">
+            <Link to="/" className="text-lg lg:text-xl font-semibold text-foreground hover:text-primary transition-colors">
               หน้าแรก
             </Link>
-            <Link to="/shop" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/shop" className="text-lg lg:text-xl font-semibold text-foreground hover:text-primary transition-colors">
               สินค้า
             </Link>
-            <Link to="/about" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/about" className="text-lg lg:text-xl font-semibold text-foreground hover:text-primary transition-colors">
               เกี่ยวกับเรา
             </Link>
-            <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/contact" className="text-lg lg:text-xl font-semibold text-foreground hover:text-primary transition-colors">
               ติดต่อเรา
             </Link>
           </div>
