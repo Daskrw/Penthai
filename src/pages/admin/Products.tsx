@@ -311,14 +311,14 @@ const Products = () => {
                 <div className="space-y-2">
                   <Label htmlFor="community">Community (Optional)</Label>
                   <Select
-                    value={formData.community_id}
-                    onValueChange={(value) => setFormData({ ...formData, community_id: value })}
+                    value={formData.community_id || "none"}
+                    onValueChange={(value) => setFormData({ ...formData, community_id: value === "none" ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select community..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Community</SelectItem>
+                      <SelectItem value="none">No Community</SelectItem>
                       {communities.map((community) => (
                         <SelectItem key={community.id} value={community.id}>
                           {community.name}
