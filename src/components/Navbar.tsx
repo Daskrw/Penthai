@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ShoppingCart, User, Search, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import penthaiLogo from "@/assets/penthai-logo.png";
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const {
     user,
     isAdmin,
@@ -18,7 +20,24 @@ const Navbar = () => {
   } = useCart();
   const navigate = useNavigate();
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  return <nav className="sticky top-0 z-50 bg-card shadow-md">
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <nav 
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? "bg-card/95 backdrop-blur-md shadow-lg" 
+          : "bg-card shadow-md"
+      }`}
+    >
       {/* Announcement Bar */}
       <div className="bg-primary text-primary-foreground py-2 text-center text-sm">
         <p>🎉 จัดส่งฟรีเมื่อสั่งซื้อครบ 499 บาท!</p>
@@ -120,6 +139,8 @@ const Navbar = () => {
             </div>
           </div>}
       </div>
-    </nav>;
+    </nav>
+  );
 };
+
 export default Navbar;

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import ReviewModal from "./ReviewModal";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const CommunityReviews = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,59 +41,60 @@ const CommunityReviews = () => {
     <section className="py-16 bg-muted/50">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            เสียงตอบรับจากสมาชิก PENTHAI
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            ฟังเสียงจากชุมชนของเรา
-          </p>
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              เสียงตอบรับจากสมาชิก PENTHAI
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              ฟังเสียงจากชุมชนของเรา
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* Reviews Grid */}
         {reviews && reviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            {reviews.map((review) => (
-              <div
-                key={review.id}
-                className="bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-              >
-                <div className="p-6">
-                  {/* User Info */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                      {review.avatar_url ? (
-                        <img
-                          src={review.avatar_url}
-                          alt={review.user_name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-5 w-5 text-primary" />
-                      )}
+            {reviews.map((review, index) => (
+              <ScrollReveal key={review.id} delay={index * 0.1}>
+                <div className="bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full">
+                  <div className="p-6">
+                    {/* User Info */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                        {review.avatar_url ? (
+                          <img
+                            src={review.avatar_url}
+                            alt={review.user_name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-5 w-5 text-primary" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground truncate">
+                          {review.user_name}
+                        </p>
+                        <div className="flex">{renderStars(review.rating)}</div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground truncate">
-                        {review.user_name}
-                      </p>
-                      <div className="flex">{renderStars(review.rating)}</div>
-                    </div>
+
+                    {/* Comment */}
+                    <p className="text-muted-foreground text-sm line-clamp-4 mb-4">
+                      {review.comment}
+                    </p>
+
+                    {/* Date */}
+                    <p className="text-xs text-muted-foreground/70">
+                      {formatDistanceToNow(new Date(review.created_at), {
+                        addSuffix: true,
+                        locale: th,
+                      })}
+                    </p>
                   </div>
-
-                  {/* Comment */}
-                  <p className="text-muted-foreground text-sm line-clamp-4 mb-4">
-                    {review.comment}
-                  </p>
-
-                  {/* Date */}
-                  <p className="text-xs text-muted-foreground/70">
-                    {formatDistanceToNow(new Date(review.created_at), {
-                      addSuffix: true,
-                      locale: th,
-                    })}
-                  </p>
                 </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         ) : (
@@ -102,20 +104,22 @@ const CommunityReviews = () => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-primary hover:bg-primary-hover text-primary-foreground"
-          >
-            เขียนรีวิว
-          </Button>
-          <Link to="/reviews">
-            <Button variant="outline" className="group">
-              ดูรีวิวทั้งหมด
-              <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+        <ScrollReveal delay={0.3}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-primary hover:bg-primary-hover text-primary-foreground"
+            >
+              เขียนรีวิว
             </Button>
-          </Link>
-        </div>
+            <Link to="/reviews">
+              <Button variant="outline" className="group">
+                ดูรีวิวทั้งหมด
+                <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </div>
+        </ScrollReveal>
       </div>
 
       <ReviewModal
