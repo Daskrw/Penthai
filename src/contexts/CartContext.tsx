@@ -12,6 +12,7 @@ interface CartItem {
     price: number;
     image_url: string;
     stock: number;
+    community_id: string | null;
   };
 }
 
@@ -74,7 +75,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               name,
               price,
               image_url,
-              stock
+              stock,
+              community_id
             )
           `)
           .eq("cart_id", cart.id);
