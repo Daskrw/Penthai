@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Eye, Clock, Truck, Ban } from "lucide-react";
 import OrderDetailsDialog from "@/components/admin/OrderDetailsDialog";
+import { useUserRole } from "@/hooks/useUserRole";
 import type { Database } from "@/integrations/supabase/types";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
@@ -46,13 +47,38 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; icon: Re
 
 const Orders = () => {
   const queryClient = useQueryClient();
+  const { isAdmin, isCommunityAdmin, communityId } = useUserRole();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
   const { data: orders, isLoading } = useQuery({
-    queryKey: ["admin-orders"],
+    queryKey: ["admin-orders", communityId, isAdmin],
     queryFn: async () => {
+      if (isCommunityAdmin && communityId) {
+        // Community admins see orders containing their community's products
+        const { data: orderItemsWithCommunity, error: itemsError } = await supabase
+          .from("order_items")
+          .select("order_id")
+          .eq("community_id", communityId);
+
+        if (itemsError) throw itemsError;
+        
+        const orderIds = [...new Set(orderItemsWithCommunity?.map(item => item.order_id) || [])];
+        
+        if (orderIds.length === 0) return [];
+
+        const { data, error } = await supabase
+          .from("orders")
+          .select("*")
+          .in("id", orderIds)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        return data as Order[];
+      }
+
+      // Super admins see all orders
       const { data, error } = await supabase
         .from("orders")
         .select("*")
@@ -61,6 +87,7 @@ const Orders = () => {
       if (error) throw error;
       return data as Order[];
     },
+    enabled: isAdmin || (isCommunityAdmin && !!communityId),
   });
 
   const { data: orderItems } = useQuery({

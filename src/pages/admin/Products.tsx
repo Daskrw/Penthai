@@ -6,8 +6,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
+import CreatableCategorySelect from "@/components/admin/CreatableCategorySelect";
 
 interface Product {
   id: string;
@@ -18,10 +21,18 @@ interface Product {
   stock: number;
   image_url: string;
   product_type: 'consumer' | 'consumable';
+  community_id: string | null;
+}
+
+interface Community {
+  id: string;
+  name: string;
 }
 
 const Products = () => {
+  const { isAdmin, isCommunityAdmin, communityId } = useUserRole();
   const [products, setProducts] = useState<Product[]>([]);
+  const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -32,20 +43,31 @@ const Products = () => {
     category: "",
     stock: "",
     image_url: "",
-    product_type: "consumer" as 'consumer' | 'consumable'
+    product_type: "consumer" as 'consumer' | 'consumable',
+    community_id: "" as string
   });
 
   useEffect(() => {
     loadProducts();
-  }, []);
+    if (isAdmin) {
+      loadCommunities();
+    }
+  }, [isAdmin, communityId]);
 
   const loadProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("products")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // Community admins only see their community's products
+      if (isCommunityAdmin && communityId) {
+        query = query.eq("community_id", communityId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       if (data) setProducts(data);
@@ -61,6 +83,20 @@ const Products = () => {
     }
   };
 
+  const loadCommunities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("community_profiles")
+        .select("id, name")
+        .order("name");
+
+      if (error) throw error;
+      if (data) setCommunities(data);
+    } catch (error) {
+      console.error("Error loading communities:", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -73,8 +109,16 @@ const Products = () => {
         category: formData.category,
         stock: parseInt(formData.stock),
         image_url: formData.image_url,
-        product_type: formData.product_type
+        product_type: formData.product_type as 'consumer' | 'consumable',
+        community_id: null as string | null,
       };
+
+      // Set community_id based on role
+      if (isCommunityAdmin && communityId) {
+        productData.community_id = communityId;
+      } else if (isAdmin && formData.community_id) {
+        productData.community_id = formData.community_id;
+      }
 
       if (editingProduct) {
         const { error } = await supabase
@@ -139,7 +183,8 @@ const Products = () => {
       category: product.category,
       stock: product.stock.toString(),
       image_url: product.image_url || "",
-      product_type: product.product_type || "consumer"
+      product_type: product.product_type || "consumer",
+      community_id: product.community_id || ""
     });
     setDialogOpen(true);
   };
@@ -153,7 +198,8 @@ const Products = () => {
       category: "",
       stock: "",
       image_url: "",
-      product_type: "consumer"
+      product_type: "consumer",
+      community_id: ""
     });
   };
 
@@ -205,11 +251,9 @@ const Products = () => {
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
+                  <CreatableCategorySelect
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    required
+                    onChange={(value) => setFormData({ ...formData, category: value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -247,17 +291,43 @@ const Products = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="product_type">Product Type *</Label>
-                <select
-                  id="product_type"
+                <Select
                   value={formData.product_type}
-                  onChange={(e) => setFormData({ ...formData, product_type: e.target.value as 'consumer' | 'consumable' })}
-                  required
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  onValueChange={(value: 'consumer' | 'consumable') => 
+                    setFormData({ ...formData, product_type: value })
+                  }
                 >
-                  <option value="consumer">สินค้าอุปโภค (Consumer Goods)</option>
-                  <option value="consumable">สินค้าบริโภค (Consumables)</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="consumer">สินค้าอุปโภค (Consumer Goods)</SelectItem>
+                    <SelectItem value="consumable">สินค้าบริโภค (Consumables)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {isAdmin && (
+                <div className="space-y-2">
+                  <Label htmlFor="community">Community (Optional)</Label>
+                  <Select
+                    value={formData.community_id}
+                    onValueChange={(value) => setFormData({ ...formData, community_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select community..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No Community</SelectItem>
+                      {communities.map((community) => (
+                        <SelectItem key={community.id} value={community.id}>
+                          {community.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
