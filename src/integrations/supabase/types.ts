@@ -427,6 +427,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          is_archived: boolean
           name: string
           price: number
           product_type: Database["public"]["Enums"]["product_type"]
@@ -440,6 +441,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_archived?: boolean
           name: string
           price: number
           product_type?: Database["public"]["Enums"]["product_type"]
@@ -453,6 +455,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_archived?: boolean
           name?: string
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
