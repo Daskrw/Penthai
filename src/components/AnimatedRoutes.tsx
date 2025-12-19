@@ -30,6 +30,7 @@ import RegisterEnterprise from "@/pages/RegisterEnterprise";
 import CheckStatus from "@/pages/CheckStatus";
 import RenewRegistration from "@/pages/RenewRegistration";
 import Documents from "@/pages/Documents";
+import UserManagement from "@/pages/admin/UserManagement";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -82,6 +83,7 @@ const AnimatedRoutes = () => {
           <Route path="portfolio" element={<AdminPortfolio />} />
           <Route path="communities" element={<AdminCommunities />} />
           <Route path="reviews" element={<AdminReviews />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
 
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

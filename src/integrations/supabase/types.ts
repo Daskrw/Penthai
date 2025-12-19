@@ -276,6 +276,7 @@ export type Database = {
       }
       order_items: {
         Row: {
+          community_id: string | null
           created_at: string
           id: string
           order_id: string
@@ -285,6 +286,7 @@ export type Database = {
           quantity: number
         }
         Insert: {
+          community_id?: string | null
           created_at?: string
           id?: string
           order_id: string
@@ -294,6 +296,7 @@ export type Database = {
           quantity: number
         }
         Update: {
+          community_id?: string | null
           created_at?: string
           id?: string
           order_id?: string
@@ -303,6 +306,13 @@ export type Database = {
           quantity?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "order_items_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "community_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_items_order_id_fkey"
             columns: ["order_id"]
@@ -412,6 +422,7 @@ export type Database = {
       products: {
         Row: {
           category: string
+          community_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -424,6 +435,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          community_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -436,6 +448,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          community_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -446,7 +459,15 @@ export type Database = {
           stock?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "community_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -573,24 +594,35 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          community_id: string | null
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          community_id?: string | null
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          community_id?: string | null
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "community_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -602,6 +634,7 @@ export type Database = {
         Returns: undefined
       }
       generate_order_number: { Args: never; Returns: string }
+      get_user_community_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -609,6 +642,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_community_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "community_admin"

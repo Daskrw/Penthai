@@ -1,10 +1,12 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ClipboardCheck, Home, Store, Newspaper, Users, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ClipboardCheck, Home, Store, Newspaper, Users, MessageSquare, UserCog } from "lucide-react";
 
 const AdminLayout = () => {
   const { signOut } = useAuth();
+  const { isAdmin, isCommunityAdmin } = useUserRole();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -48,55 +50,69 @@ const AdminLayout = () => {
             </Button>
           </Link>
           
-          <Link to="/admin/enterprises">
-            <Button
-              variant={isActive("/admin/enterprises") ? "secondary" : "ghost"}
-              className="w-full justify-start"
-            >
-              <ClipboardCheck className="mr-2 h-4 w-4" />
-              ทะเบียนวิสาหกิจ
-            </Button>
-          </Link>
-          
-          <Link to="/admin/seller-requests">
-            <Button
-              variant={isActive("/admin/seller-requests") ? "secondary" : "ghost"}
-              className="w-full justify-start"
-            >
-              <Store className="mr-2 h-4 w-4" />
-              คำขอจำหน่ายสินค้า
-            </Button>
-          </Link>
-          
-          <Link to="/admin/portfolio">
-            <Button
-              variant={isActive("/admin/portfolio") ? "secondary" : "ghost"}
-              className="w-full justify-start"
-            >
-              <Newspaper className="mr-2 h-4 w-4" />
-              จัดการผลงาน/ข่าวสาร
-            </Button>
-          </Link>
-          
-          <Link to="/admin/communities">
-            <Button
-              variant={isActive("/admin/communities") ? "secondary" : "ghost"}
-              className="w-full justify-start"
-            >
-              <Users className="mr-2 h-4 w-4" />
-              ข้อมูลชุมชน
-            </Button>
-          </Link>
-          
-          <Link to="/admin/reviews">
-            <Button
-              variant={isActive("/admin/reviews") ? "secondary" : "ghost"}
-              className="w-full justify-start"
-            >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              จัดการรีวิว
-            </Button>
-          </Link>
+          {isAdmin && (
+            <>
+              <Link to="/admin/enterprises">
+                <Button
+                  variant={isActive("/admin/enterprises") ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <ClipboardCheck className="mr-2 h-4 w-4" />
+                  ทะเบียนวิสาหกิจ
+                </Button>
+              </Link>
+              
+              <Link to="/admin/seller-requests">
+                <Button
+                  variant={isActive("/admin/seller-requests") ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <Store className="mr-2 h-4 w-4" />
+                  คำขอจำหน่ายสินค้า
+                </Button>
+              </Link>
+              
+              <Link to="/admin/portfolio">
+                <Button
+                  variant={isActive("/admin/portfolio") ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <Newspaper className="mr-2 h-4 w-4" />
+                  จัดการผลงาน/ข่าวสาร
+                </Button>
+              </Link>
+              
+              <Link to="/admin/communities">
+                <Button
+                  variant={isActive("/admin/communities") ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  ข้อมูลชุมชน
+                </Button>
+              </Link>
+              
+              <Link to="/admin/reviews">
+                <Button
+                  variant={isActive("/admin/reviews") ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  จัดการรีวิว
+                </Button>
+              </Link>
+              
+              <Link to="/admin/users">
+                <Button
+                  variant={isActive("/admin/users") ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <UserCog className="mr-2 h-4 w-4" />
+                  จัดการผู้ใช้งาน
+                </Button>
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-border space-y-2">
