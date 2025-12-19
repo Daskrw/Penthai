@@ -16,6 +16,7 @@ interface Product {
   category: string;
   product_type: 'consumer' | 'consumable';
   stock: number;
+  description: string | null;
 }
 
 const Shop = () => {
@@ -190,6 +191,7 @@ const Shop = () => {
                       rating={4.5}
                       reviews={0}
                       stock={product.stock}
+                      description={product.description || undefined}
                     />
                   ))}
                 </div>
