@@ -77,6 +77,27 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       community_enterprises: {
         Row: {
           address: string | null
@@ -590,7 +611,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "community_admin"
       enterprise_status: "pending" | "approved" | "rejected"
       order_status: "pending" | "paid" | "shipped" | "delivered" | "cancelled"
       payment_method: "promptpay" | "kbank" | "cash_on_delivery"
@@ -727,7 +748,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "community_admin"],
       enterprise_status: ["pending", "approved", "rejected"],
       order_status: ["pending", "paid", "shipped", "delivered", "cancelled"],
       payment_method: ["promptpay", "kbank", "cash_on_delivery"],
