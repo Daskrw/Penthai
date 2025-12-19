@@ -520,6 +520,36 @@ export type Database = {
         }
         Relationships: []
       }
+      site_reviews: {
+        Row: {
+          avatar_url: string | null
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_name: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          comment: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_name: string
+        }
+        Update: {
+          avatar_url?: string | null
+          comment?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

@@ -23,11 +23,13 @@ import Enterprises from "./pages/admin/Enterprises";
 import SellerRequests from "./pages/admin/SellerRequests";
 import AdminPortfolio from "./pages/admin/Portfolio";
 import AdminCommunities from "./pages/admin/Communities";
+import AdminReviews from "./pages/admin/Reviews";
 import NotFound from "./pages/NotFound";
 import CommunityRegistration from "./pages/CommunityRegistration";
 import SellerRegistration from "./pages/SellerRegistration";
 import OurWork from "./pages/OurWork";
 import CommunitySupport from "./pages/CommunitySupport";
+import Reviews from "./pages/Reviews";
 import RegisterEnterprise from "./pages/RegisterEnterprise";
 import CheckStatus from "./pages/CheckStatus";
 import RenewRegistration from "./pages/RenewRegistration";
@@ -68,6 +70,7 @@ const App = () => (
               <Route path="/check-status" element={<CheckStatus />} />
               <Route path="/renew-registration" element={<RenewRegistration />} />
               <Route path="/documents" element={<Documents />} />
+              <Route path="/reviews" element={<Reviews />} />
               <Route path="/account" element={
                 <ProtectedRoute>
                   <Account />
@@ -87,6 +90,7 @@ const App = () => (
                 <Route path="seller-requests" element={<SellerRequests />} />
                 <Route path="portfolio" element={<AdminPortfolio />} />
                 <Route path="communities" element={<AdminCommunities />} />
+                <Route path="reviews" element={<AdminReviews />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
