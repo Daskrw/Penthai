@@ -104,17 +104,12 @@ const Communities = () => {
       .getPublicUrl(filePath);
 
     const publicUrl = urlData.publicUrl;
-    console.log("=== Community Image Upload Debug ===");
-    console.log("File path:", filePath);
-    console.log("Public URL:", publicUrl);
-    console.log("URL starts with https:", publicUrl?.startsWith("https://"));
 
     return publicUrl;
   };
 
   const createMutation = useMutation({
     mutationFn: async (data: FormData & { image_url: string | null }) => {
-      console.log("Creating community with data:", data);
       const { error } = await supabase.from("community_profiles").insert([data]);
       if (error) throw error;
     },
@@ -131,7 +126,6 @@ const Communities = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (data: FormData & { id: string; image_url: string | null }) => {
-      console.log("Updating community with data:", data);
       const { id, ...updateData } = data;
       const { error } = await supabase
         .from("community_profiles")

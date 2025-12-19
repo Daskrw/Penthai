@@ -77,8 +77,6 @@ const downloadFiles = [
 const Documents = () => {
   const handleDownload = (fileName: string) => {
     // Mock download - in production, this would link to actual files
-    console.log(`Downloading: ${fileName}`);
-    // For demo purposes, show a message
     alert(`กำลังดาวน์โหลด: ${fileName}\n\n(หมายเหตุ: ไฟล์นี้เป็นตัวอย่าง)`);
   };
 
