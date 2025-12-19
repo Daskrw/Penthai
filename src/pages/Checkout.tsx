@@ -252,13 +252,14 @@ const Checkout = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
+      // Create order items with community_id from product
       const orderItems = items.map((item) => ({
         order_id: order.id,
         product_id: item.product_id,
         product_name: item.product.name,
         product_price: item.product.price,
-        quantity: item.quantity
+        quantity: item.quantity,
+        community_id: item.product.community_id || null
       }));
 
       const { error: itemsError } = await supabase
