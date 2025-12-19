@@ -30,23 +30,23 @@ const About = () => {
                 </p>
 
                 <div className="bg-card p-6 rounded-lg shadow-md border-l-4 border-primary">
-                  <h2 className="text-2xl font-semibold text-foreground mb-4">คำมั่นสัญญาของเรา</h2>
-                  <ul className="space-y-2 text-foreground">
+                  <h2 className="text-2xl font-semibold text-foreground mb-4">ปณิธานเพื่อชุมชนยั่งยืน</h2>
+                  <ul className="space-y-3 text-foreground">
                     <li className="flex items-start">
                       <span className="text-primary mr-2">✓</span>
-                      <span>สินค้าไทยแท้ 100%</span>
+                      <span><strong>สร้างรายได้สู่ท้องถิ่น:</strong> ทุกยอดสั่งซื้อคือรายได้ที่ส่งตรงถึงมือผู้ผลิตในชุมชนอย่างเป็นธรรม</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">✓</span>
-                      <span>รับประกันคุณภาพ</span>
+                      <span><strong>สืบสานภูมิปัญญาไทย:</strong> ร่วมรักษาและต่อยอดมรดกทางวัฒนธรรมท้องถิ่นไม่ให้สูญหาย</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">✓</span>
-                      <span>จัดส่งปลอดภัยและรวดเร็ว</span>
+                      <span><strong>เป็นมิตรต่อสิ่งแวดล้อม:</strong> สนับสนุนกระบวนการผลิตที่ใส่ใจธรรมชาติและใช้วัสดุในท้องถิ่น</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-primary mr-2">✓</span>
-                      <span>บริการลูกค้าเป็นเลิศ</span>
+                      <span><strong>เติบโตไปด้วยกัน:</strong> มุ่งมั่นพัฒนาศักยภาพวิสาหกิจชุมชนไทยให้ก้าวไกลสู่สากล</span>
                     </li>
                   </ul>
                 </div>
