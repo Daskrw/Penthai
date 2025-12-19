@@ -60,6 +60,7 @@ const Products = () => {
       let query = supabase
         .from("products")
         .select("*")
+        .eq("is_archived", false)
         .order("created_at", { ascending: false });
 
       // Community admins only see their community's products
@@ -153,22 +154,26 @@ const Products = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+    if (!confirm("Are you sure you want to archive this product? It will be hidden from the shop.")) return;
 
     try {
+      // Soft delete - archive instead of hard delete
       const { error } = await supabase
         .from("products")
-        .delete()
+        .update({ is_archived: true })
         .eq("id", id);
 
-      if (error) throw error;
-      toast({ title: "Success", description: "Product deleted successfully" });
+      if (error) {
+        console.error("Error archiving product:", error);
+        throw error;
+      }
+      toast({ title: "Success", description: "Product archived successfully" });
       loadProducts();
-    } catch (error) {
-      console.error("Error deleting product:", error);
+    } catch (error: any) {
+      console.error("Error archiving product:", error);
       toast({
         title: "Error",
-        description: "Failed to delete product",
+        description: error?.message || "Failed to archive product",
         variant: "destructive"
       });
     }
