@@ -56,7 +56,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Current user ID:', currentUser.id);
+    
 
     // Check if the current user is an admin using admin client
     const { data: adminRole, error: roleError } = await supabaseAdmin
@@ -85,7 +85,6 @@ serve(async (req) => {
     // Parse request body
     const { email, password, fullName, role, communityId } = await req.json();
 
-    console.log('Creating user with email:', email, 'role:', role);
 
     // Validate required fields
     if (!email || !password || !fullName || !role) {
@@ -135,8 +134,6 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('User created:', newUser.user.id);
 
     // The profile should be created by the trigger, but let's wait a moment
     // and then update the role

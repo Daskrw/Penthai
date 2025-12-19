@@ -630,6 +630,7 @@ const Checkout = () => {
                       <img
                         src={item.product.image_url || "/placeholder.svg"}
                         alt={item.product.name}
+                        loading="lazy"
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div className="flex-1">

@@ -92,7 +92,6 @@ const CommunitySupport = () => {
                       loading="lazy"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        console.log("Image load error:", community.image_url);
                         e.currentTarget.style.display = "none";
                       }}
                     />

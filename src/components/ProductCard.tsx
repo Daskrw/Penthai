@@ -34,6 +34,7 @@ const ProductCard = ({ id, name, price, image, rating, reviews, stock = 0, descr
         <img
           src={image}
           alt={name}
+          loading="lazy"
           className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? "opacity-60 grayscale" : "group-hover:scale-110"}`}
         />
         

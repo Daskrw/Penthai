@@ -101,7 +101,7 @@ const Enterprises = () => {
           table: 'community_enterprises'
         },
         (payload) => {
-          console.log('Real-time update:', payload);
+          
           
           if (payload.eventType === 'INSERT') {
             setEnterprises(prev => [payload.new as Enterprise, ...prev]);
@@ -130,7 +130,7 @@ const Enterprises = () => {
           table: 'enterprise_renewals'
         },
         (payload) => {
-          console.log('Renewal update:', payload);
+          
           
           if (payload.eventType === 'INSERT') {
             setRenewals(prev => [payload.new as Renewal, ...prev]);
