@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Clock, Truck, Ban, Package, ShoppingBag } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import AddressManagement from "@/components/account/AddressManagement";
+import PaymentMethodManagement from "@/components/account/PaymentMethodManagement";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
@@ -187,25 +189,8 @@ const Account = () => {
 
             {/* Additional Info Cards */}
             <div className="grid md:grid-cols-2 gap-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Shipping Address</CardTitle>
-                  <CardDescription>Manage your delivery addresses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">No addresses saved yet</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Methods</CardTitle>
-                  <CardDescription>Manage your payment options</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">No payment methods saved yet</p>
-                </CardContent>
-              </Card>
+              <AddressManagement />
+              <PaymentMethodManagement />
             </div>
           </div>
         </div>
