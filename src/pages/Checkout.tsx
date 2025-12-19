@@ -9,14 +9,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { generatePromptPayPayload, PROMPTPAY_PHONE } from "@/lib/promptpay";
-import { Clock, QrCode, ArrowLeft, ArrowRight, RefreshCw, CheckCircle, AlertCircle, Upload, ImageIcon } from "lucide-react";
+import { Clock, QrCode, ArrowLeft, ArrowRight, RefreshCw, CheckCircle, AlertCircle, Upload, ImageIcon, MapPin, Building2 } from "lucide-react";
 
 const SHIPPING_FEE = 50;
 const PAYMENT_TIMEOUT = 15 * 60; // 15 minutes in seconds
+
+// Bank account details for display
+const BANK_DETAILS = {
+  bankName: "ธนาคารกสิกรไทย",
+  accountName: "สำนักงานเกษตรจังหวัดเพชรบูรณ์",
+  accountNumber: "123-4-56789-0"
+};
 
 type Step = "address" | "payment";
 
@@ -24,6 +32,19 @@ interface AddressForm {
   name: string;
   phone: string;
   address: string;
+  city: string;
+  postalCode: string;
+}
+
+interface SavedAddress {
+  id: string;
+  recipient_name: string;
+  phone_number: string;
+  address_line1: string;
+  address_line2: string | null;
+  city: string;
+  postal_code: string;
+  is_default: boolean;
 }
 
 const Checkout = () => {
@@ -32,19 +53,64 @@ const Checkout = () => {
   const { items, cartTotal, clearCart } = useCart();
   
   const [step, setStep] = useState<Step>("address");
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [addressForm, setAddressForm] = useState<AddressForm>({
     name: "",
     phone: "",
-    address: ""
+    address: "",
+    city: "",
+    postalCode: ""
   });
   const [timeRemaining, setTimeRemaining] = useState(PAYMENT_TIMEOUT);
   const [isExpired, setIsExpired] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [slipPreview, setSlipPreview] = useState<string | null>(null);
+  const [addressLoading, setAddressLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const grandTotal = cartTotal + SHIPPING_FEE;
+
+  // Fetch saved addresses on mount
+  useEffect(() => {
+    const loadSavedAddresses = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("user_addresses")
+          .select("*")
+          .order("is_default", { ascending: false })
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setSavedAddresses(data);
+          
+          // Find default or most recent address
+          const defaultAddress = data.find(a => a.is_default) || data[0];
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.id);
+            setAddressForm({
+              name: defaultAddress.recipient_name,
+              phone: defaultAddress.phone_number,
+              address: `${defaultAddress.address_line1}${defaultAddress.address_line2 ? `, ${defaultAddress.address_line2}` : ""}`,
+              city: defaultAddress.city,
+              postalCode: defaultAddress.postal_code
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading addresses:", error);
+      } finally {
+        setAddressLoading(false);
+      }
+    };
+
+    loadSavedAddresses();
+  }, [user]);
 
   // Countdown timer
   useEffect(() => {
@@ -64,6 +130,20 @@ const Checkout = () => {
     return () => clearInterval(timer);
   }, [step, isExpired]);
 
+  const handleAddressSelect = (addressId: string) => {
+    setSelectedAddressId(addressId);
+    const selected = savedAddresses.find(a => a.id === addressId);
+    if (selected) {
+      setAddressForm({
+        name: selected.recipient_name,
+        phone: selected.phone_number,
+        address: `${selected.address_line1}${selected.address_line2 ? `, ${selected.address_line2}` : ""}`,
+        city: selected.city,
+        postalCode: selected.postal_code
+      });
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -72,7 +152,7 @@ const Checkout = () => {
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addressForm.name || !addressForm.phone || !addressForm.address) {
+    if (!addressForm.name || !addressForm.phone || !addressForm.address || !addressForm.city || !addressForm.postalCode) {
       toast({
         title: "ข้อมูลไม่ครบถ้วน",
         description: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
@@ -148,7 +228,9 @@ const Checkout = () => {
       // Generate order number
       const orderNumber = `ORD-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
       
-      // Create order with pending_verification status
+      // Create order with pending status
+      const fullAddress = `${addressForm.address}, ${addressForm.city} ${addressForm.postalCode}`;
+      
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -161,7 +243,7 @@ const Checkout = () => {
           total: grandTotal,
           customer_name: addressForm.name,
           customer_phone: addressForm.phone,
-          shipping_address: addressForm.address,
+          shipping_address: fullAddress,
           payment_slip_url: publicUrl,
           paid_at: new Date().toISOString()
         })
@@ -272,40 +354,98 @@ const Checkout = () => {
               {step === "address" ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>ที่อยู่จัดส่ง</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      ที่อยู่จัดส่ง
+                    </CardTitle>
                     <CardDescription>กรอกข้อมูลสำหรับการจัดส่งสินค้า</CardDescription>
                   </CardHeader>
                   <form onSubmit={handleAddressSubmit}>
                     <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">ชื่อ-นามสกุล *</Label>
-                        <Input
-                          id="name"
-                          value={addressForm.name}
-                          onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
-                          placeholder="กรอกชื่อ-นามสกุล"
-                          required
-                        />
+                      {/* Saved Address Selector */}
+                      {addressLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                        </div>
+                      ) : savedAddresses.length > 0 && (
+                        <div className="space-y-2">
+                          <Label>เลือกที่อยู่ที่บันทึกไว้</Label>
+                          <Select value={selectedAddressId} onValueChange={handleAddressSelect}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="เลือกที่อยู่..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {savedAddresses.map((addr) => (
+                                <SelectItem key={addr.id} value={addr.id}>
+                                  {addr.recipient_name} - {addr.address_line1.substring(0, 30)}...
+                                  {addr.is_default && " ⭐"}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            หรือแก้ไขข้อมูลด้านล่างสำหรับคำสั่งซื้อนี้
+                          </p>
+                        </div>
+                      )}
+
+                      <Separator />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">ชื่อ-นามสกุล *</Label>
+                          <Input
+                            id="name"
+                            value={addressForm.name}
+                            onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
+                            placeholder="กรอกชื่อ-นามสกุล"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">เบอร์โทรศัพท์ *</Label>
+                          <Input
+                            id="phone"
+                            value={addressForm.phone}
+                            onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                            placeholder="เช่น 081-234-5678"
+                            required
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">เบอร์โทรศัพท์ *</Label>
-                        <Input
-                          id="phone"
-                          value={addressForm.phone}
-                          onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-                          placeholder="เช่น 081-234-5678"
-                          required
-                        />
-                      </div>
+
                       <div className="space-y-2">
                         <Label htmlFor="address">ที่อยู่จัดส่ง *</Label>
                         <Input
                           id="address"
                           value={addressForm.address}
                           onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
-                          placeholder="กรอกที่อยู่สำหรับจัดส่ง"
+                          placeholder="บ้านเลขที่ ซอย ถนน ตำบล/แขวง อำเภอ/เขต"
                           required
                         />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="city">จังหวัด *</Label>
+                          <Input
+                            id="city"
+                            value={addressForm.city}
+                            onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                            placeholder="เช่น เพชรบูรณ์"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="postalCode">รหัสไปรษณีย์ *</Label>
+                          <Input
+                            id="postalCode"
+                            value={addressForm.postalCode}
+                            onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
+                            placeholder="เช่น 67000"
+                            required
+                          />
+                        </div>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
@@ -368,6 +508,30 @@ const Checkout = () => {
                           <div className="space-y-1">
                             <p className="text-sm text-muted-foreground">พร้อมเพย์: {PROMPTPAY_PHONE}</p>
                             <p className="text-lg font-bold text-primary">฿{grandTotal.toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        {/* Bank Account Details */}
+                        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
+                            <Building2 className="h-4 w-4" />
+                            หรือโอนเงินผ่านบัญชีธนาคาร
+                          </div>
+                          <div className="grid grid-cols-1 gap-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">ธนาคาร:</span>
+                              <span className="font-medium">{BANK_DETAILS.bankName}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">ชื่อบัญชี:</span>
+                              <span className="font-medium">{BANK_DETAILS.accountName}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">เลขบัญชี:</span>
+                              <span className="font-medium font-mono">{BANK_DETAILS.accountNumber}</span>
+                            </div>
                           </div>
                         </div>
 
