@@ -157,15 +157,7 @@ const Auth = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="signin-password">รหัสผ่าน</Label>
-                          <Link 
-                            to="/forgot-password" 
-                            className="text-sm text-primary hover:underline"
-                          >
-                            ลืมรหัสผ่าน?
-                          </Link>
-                        </div>
+                        <Label htmlFor="signin-password">รหัสผ่าน</Label>
                         <Input
                           id="signin-password"
                           type="password"
