@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   // Separate state for each tab
@@ -16,8 +17,15 @@ const Auth = () => {
   const [signInPassword, setSignInPassword] = useState("");
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // Password visibility states
+  const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [showSignUpConfirmPassword, setShowSignUpConfirmPassword] = useState(false);
+  
   const { signUp, signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -60,6 +68,15 @@ const Auth = () => {
       toast({
         title: "รหัสผ่านสั้นเกินไป",
         description: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (signUpPassword !== signUpConfirmPassword) {
+      toast({
+        title: "รหัสผ่านไม่ตรงกัน",
+        description: "กรุณากรอกรหัสผ่านให้ตรงกันทั้งสองช่อง",
         variant: "destructive"
       });
       return;
@@ -158,14 +175,24 @@ const Auth = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signin-password">รหัสผ่าน</Label>
-                        <Input
-                          id="signin-password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={signInPassword}
-                          onChange={(e) => setSignInPassword(e.target.value)}
-                          required
-                        />
+                        <div className="relative">
+                          <Input
+                            id="signin-password"
+                            type={showSignInPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={signInPassword}
+                            onChange={(e) => setSignInPassword(e.target.value)}
+                            required
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSignInPassword(!showSignInPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showSignInPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                       <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
@@ -209,15 +236,47 @@ const Auth = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signup-password">รหัสผ่าน</Label>
-                        <Input
-                          id="signup-password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={signUpPassword}
-                          onChange={(e) => setSignUpPassword(e.target.value)}
-                          required
-                          minLength={6}
-                        />
+                        <div className="relative">
+                          <Input
+                            id="signup-password"
+                            type={showSignUpPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={signUpPassword}
+                            onChange={(e) => setSignUpPassword(e.target.value)}
+                            required
+                            minLength={6}
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showSignUpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-confirm-password">ยืนยันรหัสผ่าน</Label>
+                        <div className="relative">
+                          <Input
+                            id="signup-confirm-password"
+                            type={showSignUpConfirmPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={signUpConfirmPassword}
+                            onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                            required
+                            minLength={6}
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSignUpConfirmPassword(!showSignUpConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {showSignUpConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                       <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? "กำลังสร้างบัญชี..." : "ลงทะเบียน"}
