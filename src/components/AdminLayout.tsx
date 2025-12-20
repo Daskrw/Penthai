@@ -12,9 +12,9 @@ const AdminLayout = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-card border-r border-border flex flex-col">
+      <aside className="w-64 bg-card border-r border-border flex flex-col flex-shrink-0 overflow-y-auto">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-primary">PenThai Admin</h1>
         </div>
@@ -137,7 +137,7 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         <Outlet />
       </main>
     </div>
