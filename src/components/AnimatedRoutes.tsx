@@ -5,6 +5,8 @@ import AdminLayout from "./AdminLayout";
 import PageTransition from "./PageTransition";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Shop from "@/pages/Shop";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
@@ -40,6 +42,8 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
         <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
         <Route path="/checkout" element={
