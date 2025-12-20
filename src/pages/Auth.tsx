@@ -11,11 +11,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Auth = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Separate state for each tab
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signUp, signIn, signInWithGoogle, user } = useAuth();
+  const { signUp, signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,16 +27,54 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
+  // Show loading state while auth is initializing
+  if (authLoading) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-background py-12 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">กำลังโหลด...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!fullName.trim()) {
+      toast({
+        title: "กรุณากรอกชื่อ-นามสกุล",
+        description: "กรุณากรอกชื่อ-นามสกุลของคุณ",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (signUpPassword.length < 6) {
+      toast({
+        title: "รหัสผ่านสั้นเกินไป",
+        description: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
 
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(signUpEmail.trim(), signUpPassword, fullName.trim());
 
     if (error) {
       toast({
         title: "การลงทะเบียนล้มเหลว",
-        description: error.message,
+        description: error.message === "User already registered"
+          ? "อีเมลนี้ถูกใช้งานแล้ว"
+          : error.message,
         variant: "destructive"
       });
     } else {
@@ -48,14 +89,27 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!signInEmail.trim() || !signInPassword.trim()) {
+      toast({
+        title: "กรุณากรอกข้อมูลให้ครบ",
+        description: "กรุณากรอกอีเมลและรหัสผ่าน",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(signInEmail.trim(), signInPassword);
 
     if (error) {
       toast({
         title: "เข้าสู่ระบบล้มเหลว",
-        description: error.message,
+        description: error.message === "Invalid login credentials" 
+          ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง" 
+          : error.message,
         variant: "destructive"
       });
     } else {
@@ -68,19 +122,6 @@ const Auth = () => {
     setLoading(false);
   };
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    const { error } = await signInWithGoogle();
-    
-    if (error) {
-      toast({
-        title: "เข้าสู่ระบบด้วย Google ล้มเหลว",
-        description: error.message,
-        variant: "destructive"
-      });
-      setLoading(false);
-    }
-  };
 
   return (
     <>
@@ -110,8 +151,8 @@ const Auth = () => {
                           id="signin-email"
                           type="email"
                           placeholder="your@email.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={signInEmail}
+                          onChange={(e) => setSignInEmail(e.target.value)}
                           required
                         />
                       </div>
@@ -121,8 +162,8 @@ const Auth = () => {
                           id="signin-password"
                           type="password"
                           placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          value={signInPassword}
+                          onChange={(e) => setSignInPassword(e.target.value)}
                           required
                         />
                       </div>
@@ -161,8 +202,8 @@ const Auth = () => {
                           id="signup-email"
                           type="email"
                           placeholder="your@email.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={signUpEmail}
+                          onChange={(e) => setSignUpEmail(e.target.value)}
                           required
                         />
                       </div>
@@ -172,8 +213,8 @@ const Auth = () => {
                           id="signup-password"
                           type="password"
                           placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          value={signUpPassword}
+                          onChange={(e) => setSignUpPassword(e.target.value)}
                           required
                           minLength={6}
                         />
