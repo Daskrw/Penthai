@@ -223,7 +223,7 @@ const Products = () => {
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
               <DialogDescription>
@@ -231,7 +231,7 @@ const Products = () => {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Product Name</Label>
                   <Input
@@ -254,7 +254,7 @@ const Products = () => {
                 </div>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <CreatableCategorySelect
@@ -285,7 +285,7 @@ const Products = () => {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
+                  rows={3}
                 />
               </div>
 
@@ -329,7 +329,7 @@ const Products = () => {
                 </div>
               )}
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
