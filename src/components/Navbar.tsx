@@ -70,9 +70,6 @@ const Navbar = () => {
 
           {/* Right Icons */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <Search className="h-5 w-5" />
-            </Button>
             
             {user ? <DropdownMenu>
                 <DropdownMenuTrigger asChild>
