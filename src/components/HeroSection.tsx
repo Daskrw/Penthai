@@ -109,7 +109,7 @@ const HeroSection = () => {
               <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center text-lg">
                 ✓
               </div>
-              <span>รับประกันคุณภาพ</span>
+              <span>สร้างความยั่งยืน</span>
             </motion.div>
             <motion.div className="flex items-center gap-2" variants={trustBadgeVariants}>
               <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center text-lg">
