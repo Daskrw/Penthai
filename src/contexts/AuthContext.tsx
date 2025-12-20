@@ -110,8 +110,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Clear local state first regardless of API response
+    setUser(null);
+    setSession(null);
     setIsAdmin(false);
+    
+    // Try to sign out from Supabase, but don't block on errors
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Sign out error (ignored):", error);
+    }
+    
     navigate("/");
   };
 
