@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import CreatableCategorySelect from "@/components/admin/CreatableCategorySelect";
+import ProductImageUpload from "@/components/admin/ProductImageUpload";
 
 interface Product {
   id: string;
@@ -273,16 +274,10 @@ const Products = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
+              <ProductImageUpload
+                imageUrl={formData.image_url}
+                onImageChange={(url) => setFormData({ ...formData, image_url: url })}
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
