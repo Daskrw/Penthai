@@ -115,7 +115,7 @@ const HeroSection = () => {
               <div className="h-9 w-9 rounded-full bg-accent/20 flex items-center justify-center text-lg">
                 ✓
               </div>
-              <span>จัดส่งรวดเร็ว</span>
+              <span>พัฒนาเศรษฐกิจชุมชน</span>
             </motion.div>
           </motion.div>
         </motion.div>
