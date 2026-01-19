@@ -18,7 +18,7 @@ const activities = [
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
   },
   {
-    title: "สนับสนุนชุมชน",
+    title: "เครือข่ายชุมชน",
     href: "/community-support",
     image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&q=80",
   },
