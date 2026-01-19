@@ -79,10 +79,7 @@ const AdminLayout = () => {
               </Link>
               
               <Link to="/admin/users">
-                <Button variant={isActive("/admin/users") ? "secondary" : "ghost"} className="w-full justify-start">
-                  <UserCog className="mr-2 h-4 w-4" />
-                  จัดการผู้ใช้งาน
-                </Button>
+                
               </Link>
             </>}
         </nav>
