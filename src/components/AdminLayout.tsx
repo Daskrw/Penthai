@@ -60,7 +60,7 @@ const AdminLayout = () => {
               <Link to="/admin/portfolio">
                 <Button variant={isActive("/admin/portfolio") ? "secondary" : "ghost"} className="w-full justify-start">
                   <Newspaper className="mr-2 h-4 w-4" />
-                  จัดการผลงาน/ข่าวสาร
+                  จัดการผลงาน
                 </Button>
               </Link>
               
