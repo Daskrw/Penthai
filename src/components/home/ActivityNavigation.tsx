@@ -3,7 +3,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 
 const activities = [
   {
-    title: "จดทะเบียนวิสาหกิจชุมชน",
+    title: "การเข้าร่วมการพัฒนาชุมชุน",
     href: "/community-registration",
     image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80",
   },
