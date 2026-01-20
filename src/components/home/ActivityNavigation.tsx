@@ -22,16 +22,6 @@ const featuredActivity: Activity = {
 
 const activities: Activity[] = [
   {
-    title: "การเข้าร่วมการพัฒนาชุมชุน",
-    href: "/community-registration",
-    image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80",
-  },
-  {
-    title: "ลงทะเบียนการจำหน่ายสินค้า",
-    href: "/seller-registration",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",
-  },
-  {
     title: "ผลงานของเรา",
     href: "/our-work",
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
