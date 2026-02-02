@@ -48,10 +48,7 @@ const AdminLayout = () => {
               </Link>
               
               <Link to="/admin/seller-requests">
-                <Button variant={isActive("/admin/seller-requests") ? "secondary" : "ghost"} className="w-full justify-start">
-                  <Store className="mr-2 h-4 w-4" />
-                  คำขอจำหน่ายสินค้า
-                </Button>
+                
               </Link>
               
               <Link to="/admin/portfolio">
