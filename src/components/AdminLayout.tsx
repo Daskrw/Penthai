@@ -44,10 +44,7 @@ const AdminLayout = () => {
           
           {isAdmin && <>
               <Link to="/admin/enterprises">
-                <Button variant={isActive("/admin/enterprises") ? "secondary" : "ghost"} className="w-full justify-start">
-                  <ClipboardCheck className="mr-2 h-4 w-4" />
-                  ทะเบียนวิสาหกิจ
-                </Button>
+                
               </Link>
               
               <Link to="/admin/seller-requests">
