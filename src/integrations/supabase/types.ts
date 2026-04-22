@@ -419,6 +419,47 @@ export type Database = {
         }
         Relationships: []
       }
+      product_reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          product_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          product_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string
@@ -432,6 +473,7 @@ export type Database = {
           price: number
           product_type: Database["public"]["Enums"]["product_type"]
           stock: number
+          subcategory_id: string | null
           updated_at: string
         }
         Insert: {
@@ -446,6 +488,7 @@ export type Database = {
           price: number
           product_type?: Database["public"]["Enums"]["product_type"]
           stock?: number
+          subcategory_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -460,6 +503,7 @@ export type Database = {
           price?: number
           product_type?: Database["public"]["Enums"]["product_type"]
           stock?: number
+          subcategory_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -468,6 +512,13 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "community_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
             referencedColumns: ["id"]
           },
         ]
@@ -592,6 +643,30 @@ export type Database = {
           rating?: number
           updated_at?: string
           user_name?: string
+        }
+        Relationships: []
+      }
+      subcategories: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
