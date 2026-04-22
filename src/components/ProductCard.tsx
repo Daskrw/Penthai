@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Info } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
 
@@ -96,7 +97,7 @@ const ProductCard = ({ id, name, price, image, rating, reviews, stock = 0, descr
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
+      <Link to={`/product/${id}`} className="block p-4">
         <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
           {name}
         </h3>
@@ -124,7 +125,7 @@ const ProductCard = ({ id, name, price, image, rating, reviews, stock = 0, descr
             ฿{price.toLocaleString()}
           </span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };
