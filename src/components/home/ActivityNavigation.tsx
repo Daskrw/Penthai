@@ -45,7 +45,7 @@ const ActivityNavigation = () => {
             rel="noopener noreferrer"
             className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] block mb-4 md:mb-6"
           >
-            <div className="aspect-square overflow-hidden">
+            <div className="aspect-video overflow-hidden">
               <img
                 src={featuredActivity.image}
                 alt={featuredActivity.title}
@@ -67,14 +67,14 @@ const ActivityNavigation = () => {
             {/* Centered text container */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-8">
               <h3 
-                className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-center leading-tight tracking-tight drop-shadow-lg"
+                className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-center leading-tight tracking-tight drop-shadow-lg"
                 style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.5)' }}
               >
                 {featuredActivity.title}
               </h3>
               {featuredActivity.subtitle && (
                 <p 
-                  className="text-white/90 text-lg sm:text-xl md:text-2xl mt-3 text-center drop-shadow-md"
+                  className="text-white/90 text-base sm:text-lg md:text-xl mt-2 text-center drop-shadow-md"
                   style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}
                 >
                   {featuredActivity.subtitle}
