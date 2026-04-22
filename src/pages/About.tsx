@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AboutImageCarousel from "@/components/about/AboutImageCarousel";
 const About = () => {
   return <>
       <Navbar />
@@ -52,13 +53,7 @@ const About = () => {
                 </div>
               </div>
 
-              <div className="relative">
-                <img src="/placeholder.svg" alt="งานฝีมือไทย" className="rounded-lg shadow-thai-lg w-full h-[500px] object-cover" />
-                <div className="absolute -bottom-6 -left-6 bg-primary text-primary-foreground p-6 rounded-lg shadow-lg max-w-xs">
-                  <p className="font-semibold text-lg">นำความเป็นไทยมาสู่คุณ</p>
-                  <p className="text-sm mt-2 opacity-90">ตั้งแต่ 2024</p>
-                </div>
-              </div>
+              <AboutImageCarousel />
             </div>
 
             <div className="mt-20 grid md:grid-cols-3 gap-8">

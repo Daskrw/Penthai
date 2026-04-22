@@ -17,24 +17,33 @@ interface Product {
   product_type: 'consumer' | 'consumable';
   stock: number;
   description: string | null;
+  subcategory_id: string | null;
+}
+
+interface Subcategory {
+  id: string;
+  name: string;
 }
 
 const Shop = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedProductType, setSelectedProductType] = useState<'all' | 'consumer' | 'consumable'>('all');
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadProducts();
+    loadSubcategories();
   }, []);
 
   useEffect(() => {
     filterProducts();
-  }, [products, selectedCategories, priceRange, selectedProductType]);
+  }, [products, selectedCategories, selectedSubcategories, priceRange, selectedProductType]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -48,7 +57,7 @@ const Shop = () => {
       if (error) throw error;
 
       if (data) {
-        setProducts(data);
+        setProducts(data as Product[]);
         const uniqueCategories = [...new Set(data.map(p => p.category))];
         setCategories(uniqueCategories);
       }
@@ -59,20 +68,26 @@ const Shop = () => {
     }
   };
 
+  const loadSubcategories = async () => {
+    const { data } = await supabase.from("subcategories").select("id, name").order("name");
+    setSubcategories(data || []);
+  };
+
   const filterProducts = () => {
     let filtered = products;
 
-    // Filter by product type
     if (selectedProductType !== 'all') {
       filtered = filtered.filter(p => p.product_type === selectedProductType);
     }
 
-    // Filter by categories
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(p => selectedCategories.includes(p.category));
     }
 
-    // Filter by price range
+    if (selectedSubcategories.length > 0) {
+      filtered = filtered.filter(p => p.subcategory_id && selectedSubcategories.includes(p.subcategory_id));
+    }
+
     filtered = filtered.filter(
       p => p.price >= priceRange[0] && p.price <= priceRange[1]
     );
@@ -82,9 +97,13 @@ const Shop = () => {
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
+    );
+  };
+
+  const toggleSubcategory = (id: string) => {
+    setSelectedSubcategories(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
 
@@ -113,21 +132,15 @@ const Shop = () => {
                   <RadioGroup value={selectedProductType} onValueChange={(value: any) => setSelectedProductType(value)}>
                     <div className="flex items-center space-x-2 mb-2">
                       <RadioGroupItem value="all" id="type-all" />
-                      <label htmlFor="type-all" className="text-sm font-medium cursor-pointer">
-                        ทั้งหมด
-                      </label>
+                      <label htmlFor="type-all" className="text-sm font-medium cursor-pointer">ทั้งหมด</label>
                     </div>
                     <div className="flex items-center space-x-2 mb-2">
                       <RadioGroupItem value="consumer" id="type-consumer" />
-                      <label htmlFor="type-consumer" className="text-sm font-medium cursor-pointer">
-                        สินค้าอุปโภค
-                      </label>
+                      <label htmlFor="type-consumer" className="text-sm font-medium cursor-pointer">สินค้าอุปโภค</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="consumable" id="type-consumable" />
-                      <label htmlFor="type-consumable" className="text-sm font-medium cursor-pointer">
-                        สินค้าบริโภค
-                      </label>
+                      <label htmlFor="type-consumable" className="text-sm font-medium cursor-pointer">สินค้าบริโภค</label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -139,14 +152,11 @@ const Shop = () => {
                     {categories.map((category) => (
                       <div key={category} className="flex items-center space-x-2">
                         <Checkbox
-                          id={category}
+                          id={`cat-${category}`}
                           checked={selectedCategories.includes(category)}
                           onCheckedChange={() => toggleCategory(category)}
                         />
-                        <label
-                          htmlFor={category}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
+                        <label htmlFor={`cat-${category}`} className="text-sm font-medium cursor-pointer">
                           {category}
                         </label>
                       </div>
@@ -154,18 +164,33 @@ const Shop = () => {
                   </div>
                 </div>
 
+                {/* Subcategory Filter */}
+                {subcategories.length > 0 && (
+                  <div className="mb-6">
+                    <Label className="text-lg font-medium mb-3 block">หมวดย่อย</Label>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {subcategories.map((sub) => (
+                        <div key={sub.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`sub-${sub.id}`}
+                            checked={selectedSubcategories.includes(sub.id)}
+                            onCheckedChange={() => toggleSubcategory(sub.id)}
+                          />
+                          <label htmlFor={`sub-${sub.id}`} className="text-sm font-medium cursor-pointer">
+                            {sub.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Price Filter */}
                 <div>
                   <Label className="text-lg font-medium mb-3 block">
                     ช่วงราคา: ฿{priceRange[0].toLocaleString()} - ฿{priceRange[1].toLocaleString()}
                   </Label>
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={10000}
-                    step={100}
-                    className="mt-4"
-                  />
+                  <Slider value={priceRange} onValueChange={setPriceRange} max={10000} step={100} className="mt-4" />
                 </div>
               </div>
             </aside>

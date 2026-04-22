@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import CreatableCategorySelect from "@/components/admin/CreatableCategorySelect";
+import CreatableSubcategorySelect from "@/components/admin/CreatableSubcategorySelect";
 import ProductImageUpload from "@/components/admin/ProductImageUpload";
 
 interface Product {
@@ -23,6 +24,7 @@ interface Product {
   image_url: string;
   product_type: 'consumer' | 'consumable';
   community_id: string | null;
+  subcategory_id: string | null;
 }
 
 interface Community {
@@ -45,7 +47,8 @@ const Products = () => {
     stock: "",
     image_url: "",
     product_type: "consumer" as 'consumer' | 'consumable',
-    community_id: "" as string
+    community_id: "" as string,
+    subcategory_id: null as string | null
   });
 
   useEffect(() => {
@@ -113,6 +116,7 @@ const Products = () => {
         image_url: formData.image_url,
         product_type: formData.product_type as 'consumer' | 'consumable',
         community_id: null as string | null,
+        subcategory_id: formData.subcategory_id,
       };
 
       // Set community_id based on role
@@ -190,7 +194,8 @@ const Products = () => {
       stock: product.stock.toString(),
       image_url: product.image_url || "",
       product_type: product.product_type || "consumer",
-      community_id: product.community_id || ""
+      community_id: product.community_id || "",
+      subcategory_id: product.subcategory_id || null
     });
     setDialogOpen(true);
   };
@@ -205,7 +210,8 @@ const Products = () => {
       stock: "",
       image_url: "",
       product_type: "consumer",
-      community_id: ""
+      community_id: "",
+      subcategory_id: null
     });
   };
 
@@ -256,14 +262,14 @@ const Products = () => {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">หมวดหมู่หลัก</Label>
                   <CreatableCategorySelect
                     value={formData.category}
                     onChange={(value) => setFormData({ ...formData, category: value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="stock">Stock</Label>
+                  <Label htmlFor="stock">สต็อก</Label>
                   <Input
                     id="stock"
                     type="number"
@@ -272,6 +278,17 @@ const Products = () => {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>หมวดหมู่ย่อย (Subcategory)</Label>
+                <CreatableSubcategorySelect
+                  value={formData.subcategory_id}
+                  onChange={(id) => setFormData({ ...formData, subcategory_id: id })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  เช่น เสื้อผ้า, ขนม, ของหวาน, ของคาว — Admin เพิ่มหมวดย่อยใหม่ได้เลย
+                </p>
               </div>
 
               <ProductImageUpload
