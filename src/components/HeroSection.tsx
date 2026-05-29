@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
-import heroBanner from "@/assets/hero-banner.png";
+import heroBanner from "@/assets/hero-banner-v2.png";
 const HeroSection = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const sectionRef = useRef(null);
@@ -61,7 +61,7 @@ const HeroSection = () => {
       <motion.div className="absolute inset-0" style={{
       y
     }}>
-        <img src={heroBanner} alt="สินค้าไทยแท้คุณภาพสูง" className="w-full h-[120%] object-cover" />
+        <img src={heroBanner} alt="สินค้าไทยแท้คุณภาพสูง" className="w-full h-[120%] object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
       </motion.div>
 
