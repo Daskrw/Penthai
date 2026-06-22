@@ -72,6 +72,13 @@ const AdminLayout = () => {
                 </Button>
               </Link>
               
+              <Link to="/admin/assessments">
+                <Button variant={isActive("/admin/assessments") ? "secondary" : "ghost"} className="w-full justify-start">
+                  <ClipboardCheck className="mr-2 h-4 w-4" />
+                  แบบประเมิน
+                </Button>
+              </Link>
+              
               <Link to="/admin/users">
                 
               </Link>

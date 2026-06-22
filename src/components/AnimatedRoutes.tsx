@@ -23,9 +23,13 @@ import SellerRequests from "@/pages/admin/SellerRequests";
 import AdminPortfolio from "@/pages/admin/Portfolio";
 import AdminCommunities from "@/pages/admin/Communities";
 import AdminReviews from "@/pages/admin/Reviews";
+import AdminAssessments from "@/pages/admin/Assessments";
 import NotFound from "@/pages/NotFound";
 import CommunityRegistration from "@/pages/CommunityRegistration";
 import SellerRegistration from "@/pages/SellerRegistration";
+import Assessment from "@/pages/Assessment";
+import AssessmentQuiz from "@/pages/AssessmentQuiz";
+import AssessmentResult from "@/pages/AssessmentResult";
 import OurWork from "@/pages/OurWork";
 import CommunitySupport from "@/pages/CommunitySupport";
 import Reviews from "@/pages/Reviews";
@@ -62,6 +66,9 @@ const AnimatedRoutes = () => {
         <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
         <Route path="/community-registration" element={<PageTransition><CommunityRegistration /></PageTransition>} />
         <Route path="/seller-registration" element={<PageTransition><SellerRegistration /></PageTransition>} />
+        <Route path="/assessment" element={<PageTransition><Assessment /></PageTransition>} />
+        <Route path="/assessment/quiz" element={<PageTransition><AssessmentQuiz /></PageTransition>} />
+        <Route path="/assessment/result" element={<PageTransition><AssessmentResult /></PageTransition>} />
         <Route path="/our-work" element={<PageTransition><OurWork /></PageTransition>} />
         <Route path="/community-support" element={<PageTransition><CommunitySupport /></PageTransition>} />
         <Route path="/register-enterprise" element={<PageTransition><RegisterEnterprise /></PageTransition>} />
@@ -90,6 +97,7 @@ const AnimatedRoutes = () => {
           <Route path="communities" element={<AdminCommunities />} />
           <Route path="reviews" element={<AdminReviews />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="assessments" element={<AdminAssessments />} />
         </Route>
 
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
