@@ -1,28 +1,5 @@
-CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-CREATE EXTENSION IF NOT EXISTS "plpgsql" WITH SCHEMA "pg_catalog";
-CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
---
--- PostgreSQL database dump
---
-
-
--- Dumped from database version 17.6
--- Dumped by pg_dump version 18.1
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
+-- Extensions are managed by Supabase automatically.
+-- Original pg_dump SET statements removed for compatibility.
 
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: -
@@ -74,101 +51,7 @@ CREATE TYPE public.product_type AS ENUM (
 );
 
 
---
--- Name: deduct_product_stock(uuid, integer); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.deduct_product_stock(p_product_id uuid, p_quantity integer) RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-BEGIN
-  UPDATE public.products
-  SET stock = stock - p_quantity
-  WHERE id = p_product_id AND stock >= p_quantity;
-  
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Insufficient stock for product %', p_product_id;
-  END IF;
-END;
-$$;
-
-
---
--- Name: generate_order_number(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.generate_order_number() RETURNS text
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-DECLARE
-  new_number TEXT;
-BEGIN
-  new_number := 'ORD-' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-  RETURN new_number;
-END;
-$$;
-
-
---
--- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.handle_new_user() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, full_name)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    NEW.raw_user_meta_data->>'full_name'
-  );
-  
-  -- Assign default 'user' role
-  INSERT INTO public.user_roles (user_id, role)
-  VALUES (NEW.id, 'user');
-  
-  RETURN NEW;
-END;
-$$;
-
-
---
--- Name: has_role(uuid, public.app_role); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.has_role(_user_id uuid, _role public.app_role) RETURNS boolean
-    LANGUAGE sql STABLE SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.user_roles
-    WHERE user_id = _user_id
-      AND role = _role
-  )
-$$;
-
-
---
--- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public'
-    AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$;
-
-
-SET default_table_access_method = heap;
+-- SET default_table_access_method = heap; -- removed for Supabase compatibility
 
 --
 -- Name: cart; Type: TABLE; Schema: public; Owner: -
@@ -374,6 +257,100 @@ ALTER TABLE ONLY public.user_roles
 --
 
 CREATE INDEX idx_products_product_type ON public.products USING btree (product_type);
+
+
+--
+-- Name: deduct_product_stock(uuid, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.deduct_product_stock(p_product_id uuid, p_quantity integer) RETURNS void
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  UPDATE public.products
+  SET stock = stock - p_quantity
+  WHERE id = p_product_id AND stock >= p_quantity;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Insufficient stock for product %', p_product_id;
+  END IF;
+END;
+$$;
+
+
+--
+-- Name: generate_order_number(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.generate_order_number() RETURNS text
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+DECLARE
+  new_number TEXT;
+BEGIN
+  new_number := 'ORD-' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
+  RETURN new_number;
+END;
+$$;
+
+
+--
+-- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.handle_new_user() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    NEW.raw_user_meta_data->>'full_name'
+  );
+  
+  -- Assign default 'user' role
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'user');
+  
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: has_role(uuid, public.app_role); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.has_role(_user_id uuid, _role public.app_role) RETURNS boolean
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.user_roles
+    WHERE user_id = _user_id
+      AND role = _role
+  )
+$$;
+
+
+--
+-- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -706,5 +683,4 @@ ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 --
 -- PostgreSQL database dump complete
 --
-
 

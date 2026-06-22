@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Eye, EyeOff } from "lucide-react";
@@ -119,7 +120,10 @@ const Auth = () => {
     
     setLoading(true);
 
-    const { error } = await signIn(signInEmail.trim(), signInPassword);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: signInEmail.trim(),
+      password: signInPassword
+    });
 
     if (error) {
       toast({

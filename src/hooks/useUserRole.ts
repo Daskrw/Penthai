@@ -29,12 +29,16 @@ export const useUserRole = (): UserRoleInfo => {
     const fetchRole = async () => {
       try {
         // Check for admin role first
-        const { data: adminRole } = await supabase
+        const { data: adminRole, error: adminError } = await supabase
           .from("user_roles")
           .select("role, community_id")
           .eq("user_id", user.id)
           .eq("role", "admin")
           .maybeSingle();
+
+        if (adminError) {
+          console.error("[useUserRole] admin query error:", JSON.stringify(adminError, null, 2));
+        }
 
         if (adminRole) {
           setRole("admin");
@@ -44,12 +48,16 @@ export const useUserRole = (): UserRoleInfo => {
         }
 
         // Check for community_admin role
-        const { data: communityAdminRole } = await supabase
+        const { data: communityAdminRole, error: communityError } = await supabase
           .from("user_roles")
           .select("role, community_id")
           .eq("user_id", user.id)
           .eq("role", "community_admin")
           .maybeSingle();
+
+        if (communityError) {
+          console.error("[useUserRole] community_admin query error:", JSON.stringify(communityError, null, 2));
+        }
 
         if (communityAdminRole) {
           setRole("community_admin");
@@ -62,7 +70,7 @@ export const useUserRole = (): UserRoleInfo => {
         setRole("user");
         setCommunityId(null);
       } catch (error) {
-        console.error("Error fetching user role:", error);
+        console.error("[useUserRole] exception:", error);
         setRole("user");
         setCommunityId(null);
       } finally {

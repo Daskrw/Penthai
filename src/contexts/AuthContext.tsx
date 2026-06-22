@@ -63,13 +63,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq("role", "admin")
         .maybeSingle();
 
-      if (!error && data) {
-        setIsAdmin(true);
-      } else {
+      if (error) {
+        console.error("[AuthContext] checkAdminStatus PostgREST error:", JSON.stringify(error, null, 2));
         setIsAdmin(false);
+        return;
       }
+
+      setIsAdmin(!!data);
     } catch (error) {
-      console.error("Error checking admin status:", error);
+      console.error("[AuthContext] checkAdminStatus exception:", error);
       setIsAdmin(false);
     }
   };
