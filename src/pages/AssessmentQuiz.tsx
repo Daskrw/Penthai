@@ -1,410 +1,647 @@
-import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { toast } from "@/hooks/use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Loader2, Send } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { toast } from '@/hooks/use-toast';
 import type {
   AssessmentFormFull,
   AssessmentSectionWithQuestions,
   AssessmentQuestionWithOptions,
   ResultLevel,
-} from "@/types/assessment";
+  DimensionScore,
+} from '@/types/assessment';
+import { PCGA_SCALE_LABELS, DIMENSION_SHORT_TITLES } from '@/types/assessment';
 
-// Flatten sections+questions into a linear list for navigation
-interface FlatQuestion {
-  question: AssessmentQuestionWithOptions;
-  sectionTitle: string;
-  sectionDescription: string | null;
-  globalIndex: number;
-  isFirstInSection: boolean;
-}
-
-// Answer state for each question
+// ─── Answer state for each question ──────────────────────────────
 interface AnswerState {
   text_answer?: string;
   selected_options?: string[];
   scale_value?: number;
 }
 
-const AssessmentQuiz = () => {
-  const { user, loading: authLoading } = useAuth();
+// ─── Scale colour mapping ────────────────────────────────────────
+const SCALE_COLORS: Record<number, string> = {
+  1: 'bg-amber-500',
+  2: 'bg-orange-400',
+  3: 'bg-yellow-400',
+  4: 'bg-teal-400',
+  5: 'bg-emerald-500',
+};
+
+const SCALE_RING_COLORS: Record<number, string> = {
+  1: 'ring-amber-500/40',
+  2: 'ring-orange-400/40',
+  3: 'ring-yellow-400/40',
+  4: 'ring-teal-400/40',
+  5: 'ring-emerald-500/40',
+};
+
+// ─── Slide animation variants ────────────────────────────────────
+const sectionVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -300 : 300,
+    opacity: 0,
+  }),
+};
+
+// ─── Helper: check if a question is optional ─────────────────────
+function isOptionalQuestion(
+  question: AssessmentQuestionWithOptions,
+  allQuestionsInSection: AssessmentQuestionWithOptions[],
+): boolean {
+  // paragraph questions that are open-ended (is_scored = false AND appear after scale questions)
+  if (question.question_type === 'paragraph' && !question.is_scored) {
+    const hasScaleQuestionBefore = allQuestionsInSection.some(
+      (q) => q.question_type === 'scale' && q.sort_order < question.sort_order,
+    );
+    if (hasScaleQuestionBefore) return true;
+  }
+  return false;
+}
+
+// =================================================================
+// Component
+// =================================================================
+export default function AssessmentQuiz() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const formId = searchParams.get("formId");
+  const { user, loading: authLoading } = useAuth();
 
+  const formId = searchParams.get('formId');
+
+  // Data
   const [form, setForm] = useState<AssessmentFormFull | null>(null);
-  const [flatQuestions, setFlatQuestions] = useState<FlatQuestion[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadingForm, setLoadingForm] = useState(true);
+
+  // Navigation
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // 1 = forward, -1 = backward
+
+  // Answers keyed by question ID
   const [answers, setAnswers] = useState<Record<string, AnswerState>>({});
-  const [loading, setLoading] = useState(true);
+
+  // Submission
   const [submitting, setSubmitting] = useState(false);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
 
-  // Fetch form data
+  // ─── Fetch form ──────────────────────────────────────────────
   useEffect(() => {
-    if (!formId) return;
+    if (!formId || !user) return;
+
     const fetchForm = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("assessment_forms")
-        .select(`
-          *,
-          assessment_sections (
+      setLoadingForm(true);
+      try {
+        const { data, error } = await supabase
+          .from('assessment_forms')
+          .select(
+            `
             *,
-            assessment_questions (
+            assessment_sections (
               *,
-              assessment_options (*)
+              assessment_questions (
+                *,
+                assessment_options (*)
+              )
             )
+          `,
           )
-        `)
-        .eq("id", formId)
-        .eq("is_active", true)
-        .single();
+          .eq('id', formId)
+          .single();
 
-      if (error || !data) {
+        if (error) throw error;
+
+        // Sort sections → questions → options by sort_order
+        const sorted: AssessmentFormFull = {
+          ...data,
+          assessment_sections: (data.assessment_sections ?? [])
+            .sort((a: AssessmentSectionWithQuestions, b: AssessmentSectionWithQuestions) => a.sort_order - b.sort_order)
+            .map((section: AssessmentSectionWithQuestions) => ({
+              ...section,
+              assessment_questions: (section.assessment_questions ?? [])
+                .sort((a: AssessmentQuestionWithOptions, b: AssessmentQuestionWithOptions) => a.sort_order - b.sort_order)
+                .map((q: AssessmentQuestionWithOptions) => ({
+                  ...q,
+                  assessment_options: (q.assessment_options ?? []).sort(
+                    (a, b) => a.sort_order - b.sort_order,
+                  ),
+                })),
+            })),
+        };
+
+        setForm(sorted);
+      } catch (err: any) {
         toast({
-          title: "ไม่พบแบบประเมิน",
-          description: "ไม่สามารถโหลดแบบประเมินได้ กรุณาลองใหม่อีกครั้ง",
-          variant: "destructive",
+          title: 'เกิดข้อผิดพลาด',
+          description: err.message ?? 'ไม่สามารถโหลดแบบประเมินได้',
+          variant: 'destructive',
         });
-        navigate("/assessment");
-        return;
+      } finally {
+        setLoadingForm(false);
       }
-
-      // Sort sections and questions by sort_order
-      const sortedForm = {
-        ...data,
-        assessment_sections: (data.assessment_sections || [])
-          .sort((a: any, b: any) => a.sort_order - b.sort_order)
-          .map((section: any) => ({
-            ...section,
-            assessment_questions: (section.assessment_questions || [])
-              .sort((a: any, b: any) => a.sort_order - b.sort_order)
-              .map((q: any) => ({
-                ...q,
-                assessment_options: (q.assessment_options || []).sort(
-                  (a: any, b: any) => a.sort_order - b.sort_order
-                ),
-              })),
-          })),
-      } as AssessmentFormFull;
-
-      setForm(sortedForm);
-
-      // Flatten into linear question list
-      const flat: FlatQuestion[] = [];
-      let globalIdx = 0;
-      for (const section of sortedForm.assessment_sections) {
-        let isFirst = true;
-        for (const question of section.assessment_questions) {
-          flat.push({
-            question,
-            sectionTitle: section.title,
-            sectionDescription: section.description,
-            globalIndex: globalIdx,
-            isFirstInSection: isFirst,
-          });
-          isFirst = false;
-          globalIdx++;
-        }
-      }
-      setFlatQuestions(flat);
-      setLoading(false);
     };
 
     fetchForm();
-  }, [formId, navigate]);
+  }, [formId, user]);
 
-  const currentQuestion = flatQuestions[currentIndex];
-  const totalQuestions = flatQuestions.length;
-  const progressPercent = totalQuestions > 0 ? ((currentIndex + 1) / totalQuestions) * 100 : 0;
+  // ─── Derived values ──────────────────────────────────────────
+  const sections = form?.assessment_sections ?? [];
+  const totalSections = sections.length;
+  const currentSection = sections[currentSectionIndex] as AssessmentSectionWithQuestions | undefined;
+  const progressPercent = totalSections > 0 ? ((currentSectionIndex + 1) / totalSections) * 100 : 0;
+  const isLastSection = currentSectionIndex === totalSections - 1;
 
-  const updateAnswer = useCallback((questionId: string, update: Partial<AnswerState>) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: { ...prev[questionId], ...update },
-    }));
-  }, []);
+  // ─── Answer helpers ──────────────────────────────────────────
+  const updateAnswer = useCallback(
+    (questionId: string, patch: Partial<AnswerState>) => {
+      setAnswers((prev) => ({
+        ...prev,
+        [questionId]: { ...prev[questionId], ...patch },
+      }));
+    },
+    [],
+  );
 
-  const canProceed = useCallback(() => {
-    if (!currentQuestion) return false;
-    const answer = answers[currentQuestion.question.id];
-    const qType = currentQuestion.question.question_type;
+  // ─── Validation ──────────────────────────────────────────────
+  const isSectionValid = useCallback((): boolean => {
+    if (!currentSection) return false;
+    const questions = currentSection.assessment_questions;
 
-    if (qType === "scale") {
-      return answer?.scale_value !== undefined && answer.scale_value !== null;
-    }
-    if (qType === "short_text") {
-      return !!answer?.text_answer?.trim();
-    }
-    if (qType === "paragraph") {
-      return !!answer?.text_answer?.trim();
-    }
-    if (qType === "multi_select") {
-      return (answer?.selected_options?.length || 0) > 0;
-    }
-    return true;
-  }, [currentQuestion, answers]);
+    return questions.every((q) => {
+      // Skip optional questions
+      if (isOptionalQuestion(q, questions)) return true;
 
-  const goNext = () => {
-    if (currentIndex < totalQuestions - 1) {
+      const ans = answers[q.id];
+      switch (q.question_type) {
+        case 'scale':
+          return ans?.scale_value != null;
+        case 'short_text':
+        case 'paragraph':
+          return (ans?.text_answer ?? '').trim().length > 0;
+        case 'multi_select':
+          return (ans?.selected_options ?? []).length > 0;
+        case 'single_select':
+          return (ans?.selected_options ?? []).length === 1;
+        default:
+          return true;
+      }
+    });
+  }, [currentSection, answers]);
+
+  // ─── Navigation handlers ─────────────────────────────────────
+  const goNext = useCallback(() => {
+    if (currentSectionIndex < totalSections - 1) {
       setDirection(1);
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentSectionIndex((i) => i + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [currentSectionIndex, totalSections]);
 
-  const goPrev = () => {
-    if (currentIndex > 0) {
+  const goBack = useCallback(() => {
+    if (currentSectionIndex > 0) {
       setDirection(-1);
-      setCurrentIndex((prev) => prev - 1);
+      setCurrentSectionIndex((i) => i - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [currentSectionIndex]);
 
-  const handleSubmit = async () => {
+  // ─── Submit ──────────────────────────────────────────────────
+  const handleSubmit = useCallback(async () => {
     if (!form || !user) return;
     setSubmitting(true);
 
     try {
-      // Calculate score from scale questions
-      let totalScore = 0;
-      let maxPossibleScore = 0;
+      // 1. Calculate per-dimension weighted scores
+      const dimensionScores: DimensionScore[] = [];
 
-      for (const fq of flatQuestions) {
-        if (fq.question.is_scored && fq.question.question_type === "scale") {
-          maxPossibleScore += fq.question.scale_max;
-          const answer = answers[fq.question.id];
-          if (answer?.scale_value) {
-            totalScore += answer.scale_value;
+      for (const section of sections) {
+        if (section.weight_percent <= 0) continue;
+
+        const scoredQuestions = section.assessment_questions.filter((q) => q.is_scored);
+        let rawScore = 0;
+
+        for (const q of scoredQuestions) {
+          const ans = answers[q.id];
+          if (ans?.scale_value != null) {
+            rawScore += ans.scale_value;
           }
         }
+
+        const maxRawScore = scoredQuestions.length * 5; // always 25 for 5 questions
+        const weightedScore = maxRawScore > 0 ? (rawScore / maxRawScore) * section.weight_percent : 0;
+
+        dimensionScores.push({
+          sectionId: section.id,
+          title: section.title,
+          shortTitle: DIMENSION_SHORT_TITLES[section.title] ?? section.title,
+          weight: section.weight_percent,
+          rawScore,
+          maxRawScore,
+          weightedScore,
+        });
       }
 
-      const scorePercent = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
+      const totalWeightedScore = dimensionScores.reduce((sum, d) => sum + d.weightedScore, 0);
 
-      // Determine result level
-      let resultLevel: ResultLevel = "big_tree";
-      if (scorePercent <= form.seed_max_percent) {
-        resultLevel = "seed";
-      } else if (scorePercent <= form.sapling_max_percent) {
-        resultLevel = "sapling";
+      // 2. Determine result level
+      let resultLevel: ResultLevel;
+      if (totalWeightedScore < 50) {
+        resultLevel = 'seed';
+      } else if (totalWeightedScore < 75) {
+        resultLevel = 'sapling';
+      } else {
+        resultLevel = 'big_tree';
       }
 
-      // Insert response
-      const { data: response, error: responseError } = await supabase
-        .from("assessment_responses")
+      // 3. Insert response
+      const { data: responseData, error: responseError } = await supabase
+        .from('assessment_responses')
         .insert({
           form_id: form.id,
           user_id: user.id,
-          total_score: totalScore,
-          max_possible_score: maxPossibleScore,
-          score_percent: Math.round(scorePercent * 100) / 100,
+          total_score: Math.round(totalWeightedScore),
+          max_possible_score: 100,
+          score_percent: totalWeightedScore,
           result_level: resultLevel,
         })
-        .select("id")
+        .select('id')
         .single();
 
-      if (responseError || !response) {
-        throw new Error(responseError?.message || "Failed to save response");
+      if (responseError) throw responseError;
+      const responseId = responseData.id;
+
+      // 4. Insert all individual answers
+      const answerRows: Array<{
+        response_id: string;
+        question_id: string;
+        text_answer: string | null;
+        selected_options: string[] | null;
+        scale_value: number | null;
+        score: number;
+      }> = [];
+
+      for (const section of sections) {
+        for (const q of section.assessment_questions) {
+          const ans = answers[q.id];
+          if (!ans) continue;
+
+          answerRows.push({
+            response_id: responseId,
+            question_id: q.id,
+            text_answer: ans.text_answer ?? null,
+            selected_options: ans.selected_options?.length ? ans.selected_options : null,
+            scale_value: ans.scale_value ?? null,
+            score: ans.scale_value ?? 0,
+          });
+        }
       }
 
-      // Insert individual answers
-      const answerRows = flatQuestions.map((fq) => {
-        const answer = answers[fq.question.id] || {};
-        const score =
-          fq.question.is_scored && fq.question.question_type === "scale"
-            ? answer.scale_value || 0
-            : 0;
+      if (answerRows.length > 0) {
+        const { error: answerError } = await supabase
+          .from('assessment_answers')
+          .insert(answerRows);
+        if (answerError) throw answerError;
+      }
 
-        return {
-          response_id: response.id,
-          question_id: fq.question.id,
-          text_answer: answer.text_answer || null,
-          selected_options: answer.selected_options || null,
-          scale_value: answer.scale_value ?? null,
-          score,
-        };
+      toast({
+        title: 'ส่งแบบประเมินสำเร็จ',
+        description: 'กำลังไปยังหน้าผลลัพธ์...',
       });
 
-      const { error: answersError } = await supabase
-        .from("assessment_answers")
-        .insert(answerRows);
-
-      if (answersError) {
-        console.error("Error saving answers:", answersError);
-      }
-
-      navigate(`/assessment/result?responseId=${response.id}`);
-    } catch (error: any) {
-      console.error("Submit error:", error);
+      navigate(`/assessment/result?responseId=${responseId}`);
+    } catch (err: any) {
       toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถบันทึกผลประเมินได้ กรุณาลองใหม่อีกครั้ง",
-        variant: "destructive",
+        title: 'เกิดข้อผิดพลาด',
+        description: err.message ?? 'ไม่สามารถส่งแบบประเมินได้',
+        variant: 'destructive',
       });
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [form, user, sections, answers, navigate]);
+
+  // ─── Question renderers ──────────────────────────────────────
+  const renderQuestion = useCallback(
+    (question: AssessmentQuestionWithOptions, allQuestions: AssessmentQuestionWithOptions[]) => {
+      const ans = answers[question.id] ?? {};
+      const optional = isOptionalQuestion(question, allQuestions);
+
+      return (
+        <div key={question.id} className="space-y-3">
+          {/* Question header */}
+          <div className="flex items-start gap-2">
+            {question.question_number && (
+              <span className="mt-0.5 shrink-0 font-semibold text-teal-600">
+                {question.question_number}
+              </span>
+            )}
+            <p className="text-sm font-medium leading-relaxed text-gray-800 sm:text-base">
+              {question.question_text}
+              {optional && (
+                <span className="ml-1 text-xs text-gray-400">(ไม่บังคับ)</span>
+              )}
+            </p>
+          </div>
+
+          {/* Render by type */}
+          {question.question_type === 'short_text' && (
+            <Input
+              placeholder="พิมพ์คำตอบของคุณ..."
+              value={ans.text_answer ?? ''}
+              onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
+              className="max-w-xl"
+            />
+          )}
+
+          {question.question_type === 'paragraph' && (
+            <Textarea
+              placeholder="พิมพ์คำตอบของคุณ..."
+              value={ans.text_answer ?? ''}
+              onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
+              className="max-w-xl"
+              style={{ minHeight: 120 }}
+            />
+          )}
+
+          {question.question_type === 'multi_select' && (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {question.assessment_options.map((opt) => {
+                const selected = (ans.selected_options ?? []).includes(opt.id);
+                return (
+                  <label
+                    key={opt.id}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                      selected
+                        ? 'border-teal-500 bg-teal-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={selected}
+                      onCheckedChange={(checked) => {
+                        const prev = ans.selected_options ?? [];
+                        const next = checked
+                          ? [...prev, opt.id]
+                          : prev.filter((id) => id !== opt.id);
+                        updateAnswer(question.id, { selected_options: next });
+                      }}
+                    />
+                    <span className="text-sm">{opt.option_text}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+
+          {question.question_type === 'single_select' && (
+            <RadioGroup
+              value={ans.selected_options?.[0] ?? ''}
+              onValueChange={(val) =>
+                updateAnswer(question.id, { selected_options: [val] })
+              }
+              className="grid gap-2 sm:grid-cols-2"
+            >
+              {question.assessment_options.map((opt) => {
+                const selected = ans.selected_options?.[0] === opt.id;
+                return (
+                  <label
+                    key={opt.id}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                      selected
+                        ? 'border-teal-500 bg-teal-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <RadioGroupItem value={opt.id} id={opt.id} />
+                    <Label htmlFor={opt.id} className="cursor-pointer text-sm">
+                      {opt.option_text}
+                    </Label>
+                  </label>
+                );
+              })}
+            </RadioGroup>
+          )}
+
+          {question.question_type === 'scale' && (
+            <div className="flex flex-wrap items-end justify-center gap-3 py-2 sm:gap-5">
+              {[1, 2, 3, 4, 5].map((val) => {
+                const isSelected = ans.scale_value === val;
+                return (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => updateAnswer(question.id, { scale_value: val })}
+                    className="group flex flex-col items-center gap-1.5"
+                  >
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white transition-all sm:h-12 sm:w-12 ${
+                        SCALE_COLORS[val]
+                      } ${
+                        isSelected
+                          ? `ring-4 ${SCALE_RING_COLORS[val]} scale-110`
+                          : 'opacity-70 hover:opacity-100 hover:scale-105'
+                      }`}
+                    >
+                      {val}
+                    </div>
+                    <span
+                      className={`max-w-[5rem] text-center text-[10px] leading-tight sm:text-xs ${
+                        isSelected ? 'font-semibold text-gray-800' : 'text-gray-500'
+                      }`}
+                    >
+                      {PCGA_SCALE_LABELS[val]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    },
+    [answers, updateAnswer],
+  );
+
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════
 
   // Auth loading
   if (authLoading) {
     return (
-      <>
-        <Navbar />
-        <main className="min-h-screen flex items-center justify-center bg-background">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
-      </>
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      </div>
     );
   }
 
   // Not logged in
   if (!user) {
     return (
-      <>
+      <div className="flex min-h-screen flex-col">
         <Navbar />
-        <main className="min-h-screen flex items-center justify-center bg-background px-4">
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">กรุณาเข้าสู่ระบบ</h2>
-            <p className="text-muted-foreground">คุณต้องเข้าสู่ระบบก่อนทำแบบประเมิน</p>
-            <Button onClick={() => navigate("/auth")}>เข้าสู่ระบบ</Button>
-          </div>
+        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
+          <h2 className="text-xl font-semibold text-gray-800">กรุณาเข้าสู่ระบบ</h2>
+          <p className="text-gray-500">คุณต้องเข้าสู่ระบบก่อนทำแบบประเมิน</p>
+          <Button onClick={() => navigate('/login')} className="mt-2">
+            เข้าสู่ระบบ
+          </Button>
         </main>
         <Footer />
-      </>
+      </div>
     );
   }
 
   // Loading form
-  if (loading || !form || flatQuestions.length === 0) {
+  if (loadingForm) {
     return (
-      <>
+      <div className="flex min-h-screen flex-col">
         <Navbar />
-        <main className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-            <p className="text-muted-foreground">กำลังโหลดแบบประเมิน...</p>
-          </div>
+        <main className="flex flex-1 flex-col items-center justify-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+          <p className="text-sm text-gray-500">กำลังโหลดแบบประเมิน...</p>
         </main>
         <Footer />
-      </>
+      </div>
     );
   }
 
-  const isLastQuestion = currentIndex === totalQuestions - 1;
+  // No form found
+  if (!form || totalSections === 0) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+          <h2 className="text-xl font-semibold text-gray-800">ไม่พบแบบประเมิน</h2>
+          <p className="text-gray-500">ไม่พบแบบประเมินที่ระบุ หรือยังไม่มีคำถามในแบบประเมินนี้</p>
+          <Button variant="outline" onClick={() => navigate('/assessment')}>
+            กลับหน้าประเมิน
+          </Button>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-        {/* Progress Bar */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                {form.title}
+
+      <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          {/* ── Form title ──────────────────────────────────── */}
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{form.title}</h1>
+            {form.instructions && (
+              <p className="mt-2 text-sm text-gray-500">{form.instructions}</p>
+            )}
+          </div>
+
+          {/* ── Progress bar ────────────────────────────────── */}
+          <div className="mb-6 space-y-1">
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>
+                ส่วนที่ {currentSectionIndex + 1} จาก {totalSections}
               </span>
-              <span className="text-sm font-semibold text-primary">
-                {currentIndex + 1} / {totalQuestions}
-              </span>
+              <span>{Math.round(progressPercent)}%</span>
             </div>
             <Progress value={progressPercent} className="h-2" />
           </div>
-        </div>
 
-        {/* Question Area */}
-        <div className="container mx-auto px-4 py-8 md:py-12 max-w-3xl">
+          {/* ── Section content ─────────────────────────────── */}
           <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              initial={{ opacity: 0, x: direction * 80 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: direction * -80 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              {/* Section Header (only on first question of each section) */}
-              {currentQuestion.isFirstInSection && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-8 text-center"
-                >
-                  <div className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3">
-                    {currentQuestion.sectionTitle}
+            {currentSection && (
+              <motion.div
+                key={currentSection.id}
+                custom={direction}
+                variants={sectionVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                {/* Section header */}
+                <div className="mb-6 rounded-xl border border-teal-100 bg-white p-5 shadow-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {currentSection.title}
+                    </h2>
+                    {currentSection.weight_percent > 0 && (
+                      <Badge variant="secondary" className="bg-teal-50 text-teal-700">
+                        น้ำหนัก {currentSection.weight_percent}%
+                      </Badge>
+                    )}
                   </div>
-                  {currentQuestion.sectionDescription && (
-                    <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
-                      {currentQuestion.sectionDescription}
+                  {currentSection.description && (
+                    <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                      {currentSection.description}
                     </p>
                   )}
-                </motion.div>
-              )}
+                </div>
 
-              {/* Question Card */}
-              <div className="bg-card rounded-2xl shadow-lg border border-border p-6 md:p-10">
-                <h2 className="text-lg md:text-xl font-semibold text-foreground mb-8 leading-relaxed">
-                  <span className="text-primary font-bold mr-2">
-                    {currentIndex + 1}.
-                  </span>
-                  {currentQuestion.question.question_text}
-                </h2>
-
-                {/* Answer Input based on question type */}
-                <QuestionInput
-                  question={currentQuestion.question}
-                  answer={answers[currentQuestion.question.id] || {}}
-                  onUpdate={(update) =>
-                    updateAnswer(currentQuestion.question.id, update)
-                  }
-                />
-              </div>
-            </motion.div>
+                {/* Questions */}
+                <div className="space-y-6">
+                  {currentSection.assessment_questions.map((q) => (
+                    <div
+                      key={q.id}
+                      className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm"
+                    >
+                      {renderQuestion(q, currentSection.assessment_questions)}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8">
+          {/* ── Navigation buttons ──────────────────────────── */}
+          <div className="mt-8 flex items-center justify-between">
             <Button
               variant="outline"
-              onClick={goPrev}
-              disabled={currentIndex === 0}
-              className="gap-2"
+              onClick={goBack}
+              disabled={currentSectionIndex === 0}
+              className="gap-1"
             >
               <ChevronLeft className="h-4 w-4" />
               ย้อนกลับ
             </Button>
 
-            {isLastQuestion ? (
+            {isLastSection ? (
               <Button
                 onClick={handleSubmit}
-                disabled={!canProceed() || submitting}
-                className="gap-2 bg-primary hover:bg-primary/90 text-white px-8"
-                size="lg"
+                disabled={!isSectionValid() || submitting}
+                className="gap-1 bg-teal-600 hover:bg-teal-700"
               >
                 {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    กำลังบันทึก...
-                  </>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "ส่งแบบประเมิน"
+                  <Send className="h-4 w-4" />
                 )}
+                ส่งแบบประเมิน
               </Button>
             ) : (
               <Button
                 onClick={goNext}
-                disabled={!canProceed()}
-                className="gap-2"
+                disabled={!isSectionValid()}
+                className="gap-1 bg-teal-600 hover:bg-teal-700"
               >
                 ถัดไป
                 <ChevronRight className="h-4 w-4" />
@@ -413,166 +650,8 @@ const AssessmentQuiz = () => {
           </div>
         </div>
       </main>
+
       <Footer />
-    </>
-  );
-};
-
-// ============================================================
-// QuestionInput Component — renders the right input for each type
-// ============================================================
-interface QuestionInputProps {
-  question: AssessmentQuestionWithOptions;
-  answer: AnswerState;
-  onUpdate: (update: Partial<AnswerState>) => void;
-}
-
-const QuestionInput = ({ question, answer, onUpdate }: QuestionInputProps) => {
-  switch (question.question_type) {
-    case "short_text":
-      return (
-        <Input
-          placeholder="พิมพ์คำตอบของคุณ..."
-          value={answer.text_answer || ""}
-          onChange={(e) => onUpdate({ text_answer: e.target.value })}
-          className="text-base py-6"
-        />
-      );
-
-    case "paragraph":
-      return (
-        <Textarea
-          placeholder="พิมพ์คำตอบของคุณ..."
-          value={answer.text_answer || ""}
-          onChange={(e) => onUpdate({ text_answer: e.target.value })}
-          className="min-h-[150px] text-base"
-        />
-      );
-
-    case "multi_select":
-      return (
-        <div className="space-y-3">
-          {question.assessment_options.map((option) => {
-            const isChecked = (answer.selected_options || []).includes(option.id);
-            return (
-              <label
-                key={option.id}
-                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                  isChecked
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-border hover:border-primary/40 hover:bg-muted/50"
-                }`}
-              >
-                <Checkbox
-                  checked={isChecked}
-                  onCheckedChange={(checked) => {
-                    const prev = answer.selected_options || [];
-                    const updated = checked
-                      ? [...prev, option.id]
-                      : prev.filter((id) => id !== option.id);
-                    onUpdate({ selected_options: updated });
-                  }}
-                />
-                <span className="text-base">{option.option_text}</span>
-              </label>
-            );
-          })}
-        </div>
-      );
-
-    case "scale":
-      return <ScaleInput question={question} answer={answer} onUpdate={onUpdate} />;
-
-    default:
-      return null;
-  }
-};
-
-// ============================================================
-// ScaleInput — 16personalities-style agree/disagree scale
-// ============================================================
-const ScaleInput = ({ question, answer, onUpdate }: QuestionInputProps) => {
-  const min = question.scale_min;
-  const max = question.scale_max;
-  const steps = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-
-  const scaleLabels: Record<number, string> = {
-    1: "น้อยที่สุด",
-    2: "น้อย",
-    3: "ปานกลาง",
-    4: "มาก",
-    5: "มากที่สุด",
-  };
-
-  const scaleColors: Record<number, string> = {
-    1: "bg-red-500 hover:bg-red-600 ring-red-300",
-    2: "bg-orange-400 hover:bg-orange-500 ring-orange-200",
-    3: "bg-yellow-400 hover:bg-yellow-500 ring-yellow-200",
-    4: "bg-teal-400 hover:bg-teal-500 ring-teal-200",
-    5: "bg-green-500 hover:bg-green-600 ring-green-300",
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Scale labels */}
-      <div className="flex justify-between text-xs text-muted-foreground px-2">
-        <span>{question.scale_min_label || "ไม่เห็นด้วยอย่างยิ่ง"}</span>
-        <span>{question.scale_max_label || "เห็นด้วยอย่างยิ่ง"}</span>
-      </div>
-
-      {/* Scale buttons */}
-      <div className="flex justify-center gap-2 sm:gap-3 md:gap-4">
-        {steps.map((value) => {
-          const isSelected = answer.scale_value === value;
-          const colorClass = scaleColors[value] || "bg-gray-400";
-
-          return (
-            <motion.button
-              key={value}
-              type="button"
-              onClick={() => onUpdate({ scale_value: value })}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className={`
-                relative flex flex-col items-center gap-1.5 transition-all duration-200
-              `}
-            >
-              <div
-                className={`
-                  w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full
-                  flex items-center justify-center
-                  text-white font-bold text-lg sm:text-xl
-                  transition-all duration-200 cursor-pointer
-                  ${colorClass}
-                  ${isSelected ? "ring-4 scale-110 shadow-lg" : "opacity-70 hover:opacity-100"}
-                `}
-              >
-                {value}
-              </div>
-              <span
-                className={`text-[10px] sm:text-xs transition-colors duration-200 ${
-                  isSelected ? "text-foreground font-semibold" : "text-muted-foreground"
-                }`}
-              >
-                {scaleLabels[value] || value}
-              </span>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* Selected indicator */}
-      {answer.scale_value && (
-        <motion.p
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center text-sm text-primary font-medium"
-        >
-          คุณเลือก: {scaleLabels[answer.scale_value] || answer.scale_value} ({answer.scale_value} คะแนน)
-        </motion.p>
-      )}
     </div>
   );
-};
-
-export default AssessmentQuiz;
+}

@@ -1,388 +1,559 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ClipboardCheck, Calculator, Trophy, ArrowRight, LogIn } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  LogIn,
+  Leaf,
+  Shield,
+  TreePine,
+  Sprout,
+  Trees,
+  Sparkles,
+  Users,
+  Lightbulb,
+  TrendingUp,
+  Award,
+  Network,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+/* ------------------------------------------------------------------ */
+/*  Data                                                               */
+/* ------------------------------------------------------------------ */
+
+const TIERS = [
+  {
+    emoji: "🌱",
+    label: "ชุมชนเมล็ดพันธุ์",
+    labelEn: "Seed Community",
+    range: "0-49 คะแนน",
+    description:
+      "ชุมชนที่มีทุนทางวัฒนธรรมและศักยภาพพื้นฐาน แต่ยังไม่ได้รับการพัฒนาอย่างเป็นระบบ",
+    gradient: "from-amber-500/20 to-orange-600/20",
+    border: "border-amber-500/30",
+    badge: "bg-amber-500/20 text-amber-300",
+    icon: Sprout,
+    iconColor: "text-amber-400",
+  },
+  {
+    emoji: "🌿",
+    label: "ชุมชนต้นกล้า",
+    labelEn: "Growth Community",
+    range: "50-74 คะแนน",
+    description:
+      "ชุมชนที่เริ่มนำทุนทางวัฒนธรรมมาต่อยอดผ่านกระบวนการสร้างสรรค์",
+    gradient: "from-teal-500/20 to-cyan-600/20",
+    border: "border-teal-500/30",
+    badge: "bg-teal-500/20 text-teal-300",
+    icon: TreePine,
+    iconColor: "text-teal-400",
+  },
+  {
+    emoji: "🌳",
+    label: "ชุมชนไม้ใหญ่",
+    labelEn: "Legacy Community",
+    range: "75-100 คะแนน",
+    description:
+      "ชุมชนที่สามารถสร้างรายได้จากทุนทางวัฒนธรรมได้อย่างต่อเนื่อง",
+    gradient: "from-emerald-500/20 to-green-600/20",
+    border: "border-emerald-500/30",
+    badge: "bg-emerald-500/20 text-emerald-300",
+    icon: Trees,
+    iconColor: "text-emerald-400",
+  },
+] as const;
+
+const DIMENSIONS = [
+  { label: "ทุนทางวัฒนธรรม", weight: 20, icon: Sparkles },
+  { label: "ความเข้มแข็งของชุมชน", weight: 15, icon: Users },
+  { label: "ความคิดสร้างสรรค์และนวัตกรรม", weight: 20, icon: Lightbulb },
+  { label: "ความพร้อมทางธุรกิจและตลาด", weight: 15, icon: TrendingUp },
+  { label: "มาตรฐานสินค้าและบริการ", weight: 15, icon: Award },
+  { label: "ความยั่งยืนและเครือข่าย", weight: 15, icon: Network },
+] as const;
 
 /* ------------------------------------------------------------------ */
 /*  Animation helpers                                                  */
 /* ------------------------------------------------------------------ */
+
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.15, duration: 0.55, ease: 'easeOut' },
+    transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" },
   }),
 };
 
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: (i: number) => ({
-    opacity: 1,
-    scale: 1,
-    transition: { delay: i * 0.12, duration: 0.5, ease: 'easeOut' },
-  }),
+const stagger = {
+  visible: { transition: { staggerChildren: 0.12 } },
 };
-
-/* ------------------------------------------------------------------ */
-/*  Static data                                                        */
-/* ------------------------------------------------------------------ */
-const steps = [
-  {
-    icon: ClipboardCheck,
-    title: 'ตอบแบบสอบถาม',
-    description: 'ตอบคำถามเกี่ยวกับทรัพยากรและศักยภาพของชุมชนคุณ',
-  },
-  {
-    icon: Calculator,
-    title: 'ระบบคำนวณคะแนน',
-    description: 'ระบบจะวิเคราะห์และคำนวณคะแนนความพร้อมอัตโนมัติ',
-  },
-  {
-    icon: Trophy,
-    title: 'รับผลประเมิน',
-    description: 'ดูผลลัพธ์พร้อมคำแนะนำในการพัฒนาชุมชนของคุณ',
-  },
-];
-
-const levels = [
-  {
-    emoji: '🌱',
-    title: 'ชุมชนเมล็ดพันธุ์',
-    subtitle: 'Seed Community',
-    description: 'ชุมชนที่เริ่มต้นสำรวจศักยภาพ พร้อมเรียนรู้และพัฒนาต่อยอด',
-    gradient: 'from-emerald-500/80 to-green-600/80',
-    border: 'border-emerald-400/40',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-    ring: 'ring-emerald-300/50',
-  },
-  {
-    emoji: '🌿',
-    title: 'ชุมชนต้นกล้า',
-    subtitle: 'Sapling Community',
-    description: 'ชุมชนที่มีรากฐานมั่นคง พร้อมขยายผลและเชื่อมต่อเครือข่าย',
-    gradient: 'from-teal-500/80 to-cyan-600/80',
-    border: 'border-teal-400/40',
-    bg: 'bg-teal-50',
-    text: 'text-teal-700',
-    ring: 'ring-teal-300/50',
-  },
-  {
-    emoji: '🌳',
-    title: 'ชุมชนไม้ใหญ่',
-    subtitle: 'Big Tree Community',
-    description: 'ชุมชนที่แข็งแกร่ง พร้อมเป็นต้นแบบและแบ่งปันองค์ความรู้',
-    gradient: 'from-green-700/80 to-emerald-800/80',
-    border: 'border-green-500/40',
-    bg: 'bg-green-50',
-    text: 'text-green-800',
-    ring: 'ring-green-400/50',
-  },
-];
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
+
 const Assessment = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  /* ---------- Auth gate ---------- */
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-red-50 via-orange-50 to-amber-50">
-        <Navbar />
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [isAcceptEnabled, setIsAcceptEnabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-        <div className="flex-1 flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-md w-full text-center space-y-6"
-          >
-            <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-              <LogIn className="w-10 h-10 text-primary" />
-            </div>
+  /* ---------- countdown logic ---------- */
 
-            <h2 className="text-2xl font-bold text-gray-800">
-              กรุณาเข้าสู่ระบบ
-            </h2>
-            <p className="text-gray-500">
-              คุณจำเป็นต้องเข้าสู่ระบบเพื่อเข้าถึงแบบประเมินความพร้อมชุมชน
-            </p>
+  useEffect(() => {
+    if (!showPrivacyModal) return;
 
-            <Link to="/auth">
-              <Button size="lg" className="gap-2 mt-2">
-                <LogIn className="w-5 h-5" />
-                เข้าสู่ระบบ
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
+    setCountdown(3);
+    setIsAcceptEnabled(false);
 
-        <Footer />
-      </div>
-    );
-  }
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsAcceptEnabled(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  /* ---------- Start assessment handler ---------- */
-  const handleStart = async () => {
-    setLoading(true);
+    return () => clearInterval(interval);
+  }, [showPrivacyModal]);
+
+  /* ---------- handlers ---------- */
+
+  const handleStart = useCallback(() => {
+    setShowPrivacyModal(true);
+  }, []);
+
+  const handleAccept = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('assessment_forms')
-        .select('id')
-        .eq('is_active', true)
+        .from("assessment_forms")
+        .select("id")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
         .limit(1)
         .single();
 
       if (error || !data) {
         toast({
-          title: 'ไม่พบแบบประเมิน',
-          description: 'ขณะนี้ยังไม่มีแบบประเมินที่เปิดใช้งาน กรุณาลองอีกครั้งภายหลัง',
-          variant: 'destructive',
+          title: "ไม่พบแบบประเมิน",
+          description: "ขณะนี้ยังไม่มีแบบประเมินที่เปิดใช้งาน กรุณาลองใหม่ภายหลัง",
+          variant: "destructive",
         });
+        setShowPrivacyModal(false);
         return;
       }
 
       navigate(`/assessment/quiz?formId=${data.id}`);
     } catch {
       toast({
-        title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถโหลดแบบประเมินได้ กรุณาลองอีกครั้ง',
-        variant: 'destructive',
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดแบบประเมินได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [navigate, toast]);
 
-  /* ---------- Render ---------- */
+  const handleDecline = useCallback(() => {
+    setShowPrivacyModal(false);
+    navigate("/");
+  }, [navigate]);
+
+  /* ---------------------------------------------------------------- */
+  /*  Auth Gate                                                        */
+  /* ---------------------------------------------------------------- */
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 flex items-center justify-center px-4">
+        <Navbar />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="max-w-md w-full bg-slate-800/60 backdrop-blur-xl border-slate-700/50 p-8 text-center space-y-6 shadow-2xl">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center">
+              <LogIn className="w-8 h-8 text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">
+              กรุณาเข้าสู่ระบบ
+            </h2>
+            <p className="text-slate-300 leading-relaxed">
+              คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเริ่มทำแบบประเมิน PCGA ได้
+            </p>
+            <Button
+              asChild
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium"
+            >
+              <Link to="/auth">
+                <LogIn className="mr-2 h-4 w-4" />
+                เข้าสู่ระบบ
+              </Link>
+            </Button>
+          </Card>
+        </motion.div>
+        <Footer />
+      </div>
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Main Page                                                        */
+  /* ---------------------------------------------------------------- */
+
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <Navbar />
 
-      {/* ==================== HERO ==================== */}
-      <section className="relative overflow-hidden isolate">
-        {/* Gradient background */}
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-red-700 via-red-600 to-amber-500"
-        />
-        {/* Decorative blobs */}
-        <div
-          aria-hidden
-          className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-amber-400/20 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="absolute -bottom-32 -right-32 w-[30rem] h-[30rem] rounded-full bg-red-900/30 blur-3xl"
-        />
+      {/* ============================================================ */}
+      {/*  HERO                                                         */}
+      {/* ============================================================ */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 pt-28 pb-24 lg:pt-36 lg:pb-32">
+        {/* Decorative floating organic shapes */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* Large soft circle */}
+          <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-emerald-600/[0.07] blur-3xl" />
+          <div className="absolute bottom-0 -left-24 h-[400px] w-[400px] rounded-full bg-teal-600/[0.06] blur-3xl" />
 
-        <div className="relative mx-auto max-w-4xl px-4 py-24 sm:py-32 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight drop-shadow-md"
-          >
-            แบบประเมินความพร้อมชุมชน
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mt-5 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed"
-          >
-            ประเมินศักยภาพและความพร้อมในการพัฒนาซอฟต์พาวเวอร์ของชุมชนคุณ
-          </motion.p>
-
+          {/* Floating leaf shapes (CSS only) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="mt-8"
+            animate={{ y: [0, -18, 0], rotate: [0, 8, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-24 right-[18%] h-10 w-5 rounded-[50%_50%_50%_0%] rotate-45 bg-emerald-500/10"
+          />
+          <motion.div
+            animate={{ y: [0, 14, 0], rotate: [0, -6, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[40%] left-[12%] h-8 w-4 rounded-[50%_50%_50%_0%] rotate-[120deg] bg-teal-400/10"
+          />
+          <motion.div
+            animate={{ y: [0, -10, 0], rotate: [0, 12, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-24 right-[30%] h-12 w-6 rounded-[50%_50%_50%_0%] -rotate-12 bg-green-400/10"
+          />
+          <motion.div
+            animate={{ y: [0, 10, 0], x: [0, -6, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[55%] right-[8%] h-6 w-3 rounded-[50%_50%_50%_0%] rotate-[200deg] bg-emerald-300/10"
+          />
+        </div>
+
+        <div className="relative mx-auto max-w-5xl px-4 text-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
           >
-            <Button
-              size="lg"
-              onClick={handleStart}
-              disabled={loading}
-              className="bg-white text-red-700 hover:bg-amber-50 shadow-lg shadow-red-900/30 text-base px-8 py-6 rounded-xl gap-2 font-semibold transition-transform hover:scale-105"
+            <motion.div variants={fadeUp} custom={0} className="mb-4">
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400 ring-1 ring-emerald-500/20">
+                <Leaf className="h-4 w-4" />
+                Community Assessment Tool
+              </span>
+            </motion.div>
+
+            <motion.h1
+              variants={fadeUp}
+              custom={1}
+              className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-white"
             >
-              {loading ? 'กำลังโหลด...' : 'เริ่มทำแบบประเมิน'}
-              {!loading && <ArrowRight className="w-5 h-5" />}
-            </Button>
+              PCGA
+            </motion.h1>
+
+            <motion.p
+              variants={fadeUp}
+              custom={2}
+              className="mt-2 text-lg sm:text-xl font-medium text-emerald-300/90"
+            >
+              Penthai Community Growth Assessment
+            </motion.p>
+
+            <motion.p
+              variants={fadeUp}
+              custom={3}
+              className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300"
+            >
+              เครื่องมือประเมินศักยภาพและความพร้อมของชุมชนเพื่อการพัฒนา
+            </motion.p>
+
+            <motion.div variants={fadeUp} custom={4} className="mt-10">
+              <Button
+                onClick={handleStart}
+                size="lg"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-emerald-900/40 transition-all duration-200"
+              >
+                เริ่มทำแบบประเมิน
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* ==================== HOW IT WORKS ==================== */}
-      <section className="py-20 px-4 bg-gradient-to-b from-red-50/60 to-white">
-        <div className="max-w-5xl mx-auto">
-          <motion.h2
-            variants={fadeUp}
+      {/* ============================================================ */}
+      {/*  THREE-TIER GROWTH VISUALIZATION                              */}
+      {/* ============================================================ */}
+      <section className="relative bg-slate-950 py-20 lg:py-28">
+        <div className="mx-auto max-w-6xl px-4">
+          <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            custom={0}
-            className="text-2xl sm:text-3xl font-bold text-center text-gray-800"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+            className="text-center mb-14"
           >
-            ขั้นตอนการประเมิน
-          </motion.h2>
+            <motion.h2
+              variants={fadeUp}
+              custom={0}
+              className="text-3xl sm:text-4xl font-bold text-white"
+            >
+              ระดับการเติบโตของชุมชน
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              custom={1}
+              className="mt-3 text-slate-400 max-w-xl mx-auto"
+            >
+              ผลการประเมินจะจัดชุมชนของคุณเข้าสู่หนึ่งในสามระดับการเติบโต
+            </motion.p>
+          </motion.div>
 
-          <div className="mt-14 grid gap-8 sm:grid-cols-3">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={stagger}
+            className="grid gap-6 md:grid-cols-3"
+          >
+            {TIERS.map((tier, i) => {
+              const Icon = tier.icon;
               return (
-                <motion.div
-                  key={step.title}
-                  variants={fadeUp}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.3 }}
-                  custom={i + 1}
-                  className="flex flex-col items-center text-center"
-                >
-                  {/* Step number ring */}
-                  <div className="relative mb-5">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-600 to-amber-500 flex items-center justify-center shadow-lg shadow-red-200">
-                      <Icon className="w-9 h-9 text-white" />
+                <motion.div key={tier.label} variants={fadeUp} custom={i}>
+                  <Card
+                    className={`group relative h-full overflow-hidden bg-gradient-to-br ${tier.gradient} backdrop-blur-sm border ${tier.border} p-7 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
+                  >
+                    {/* Icon */}
+                    <div className="mb-4 flex items-center gap-3">
+                      <span className="text-4xl">{tier.emoji}</span>
+                      <Icon className={`h-6 w-6 ${tier.iconColor}`} />
                     </div>
-                    <span className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-amber-400 text-white text-sm font-bold flex items-center justify-center shadow">
-                      {i + 1}
+
+                    {/* Title & Range */}
+                    <h3 className="text-xl font-bold text-white">
+                      {tier.label}
+                    </h3>
+                    <p className="text-sm font-medium text-slate-300 mt-0.5">
+                      {tier.labelEn}
+                    </p>
+                    <span
+                      className={`mt-3 inline-block rounded-full px-3 py-1 text-xs font-semibold ${tier.badge}`}
+                    >
+                      {tier.range}
                     </span>
-                  </div>
 
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-500 max-w-xs">
-                    {step.description}
-                  </p>
-
-                  {/* Connector line (hidden on last item & mobile) */}
-                  {i < steps.length - 1 && (
-                    <div className="hidden sm:block absolute" />
-                  )}
+                    {/* Description */}
+                    <p className="mt-4 text-sm leading-relaxed text-slate-300">
+                      {tier.description}
+                    </p>
+                  </Card>
                 </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ==================== RESULT LEVELS ==================== */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <motion.h2
-            variants={fadeUp}
+      {/* ============================================================ */}
+      {/*  SIX-DIMENSION PREVIEW GRID                                   */}
+      {/* ============================================================ */}
+      <section className="relative bg-gradient-to-b from-slate-950 to-slate-900 py-20 lg:py-28">
+        <div className="mx-auto max-w-6xl px-4">
+          <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            custom={0}
-            className="text-2xl sm:text-3xl font-bold text-center text-gray-800"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+            className="text-center mb-14"
           >
-            ระดับผลประเมิน
-          </motion.h2>
-          <motion.p
-            variants={fadeUp}
+            <motion.h2
+              variants={fadeUp}
+              custom={0}
+              className="text-3xl sm:text-4xl font-bold text-white"
+            >
+              6 มิติการประเมิน
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              custom={1}
+              className="mt-3 text-slate-400 max-w-xl mx-auto"
+            >
+              แบบประเมินครอบคลุม 6 มิติสำคัญที่สะท้อนศักยภาพรอบด้านของชุมชน
+            </motion.p>
+          </motion.div>
+
+          <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            custom={1}
-            className="mt-3 text-center text-gray-500 max-w-lg mx-auto"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={stagger}
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
-            ชุมชนของคุณจะได้รับการจัดระดับเป็นหนึ่งในสามระดับต่อไปนี้
-          </motion.p>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {levels.map((level, i) => (
-              <motion.div
-                key={level.title}
-                variants={scaleIn}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.25 }}
-                custom={i + 1}
-              >
-                <Card
-                  className={`group relative overflow-hidden border ${level.border} hover:shadow-xl transition-shadow duration-300 rounded-2xl`}
-                >
-                  {/* Coloured header strip */}
-                  <div
-                    className={`h-2 w-full bg-gradient-to-r ${level.gradient}`}
-                  />
-
-                  <CardContent className="pt-7 pb-6 px-5 flex flex-col items-center text-center">
-                    <span className="text-5xl drop-shadow">{level.emoji}</span>
-
-                    <h3 className={`mt-4 text-lg font-bold ${level.text}`}>
-                      {level.title}
-                    </h3>
-                    <span className="text-xs text-gray-400 tracking-wide uppercase">
-                      {level.subtitle}
-                    </span>
-
-                    <p className="mt-3 text-sm text-gray-500 leading-relaxed">
-                      {level.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+            {DIMENSIONS.map((dim, i) => {
+              const Icon = dim.icon;
+              return (
+                <motion.div key={dim.label} variants={fadeUp} custom={i}>
+                  <Card className="group relative h-full bg-slate-800/50 backdrop-blur-sm border-slate-700/40 p-6 transition-all duration-300 hover:border-emerald-500/30 hover:bg-slate-800/70 hover:shadow-lg">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                          <Icon className="h-5 w-5 text-emerald-400" />
+                        </div>
+                        <h3 className="text-base font-semibold text-white leading-snug">
+                          {dim.label}
+                        </h3>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/20">
+                        {dim.weight}%
+                      </span>
+                    </div>
+                    {/* Subtle progress indicator */}
+                    <div className="mt-4 h-1.5 w-full rounded-full bg-slate-700/50 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500/60 to-teal-400/60 transition-all duration-700"
+                        style={{ width: `${dim.weight * 4}%` }}
+                      />
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
         </div>
       </section>
 
-      {/* ==================== BOTTOM CTA ==================== */}
-      <section className="relative overflow-hidden py-20 px-4">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-red-700 via-red-600 to-amber-500"
-        />
-        <div
-          aria-hidden
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[50rem] h-[50rem] rounded-full bg-amber-400/10 blur-3xl"
-        />
+      {/* ============================================================ */}
+      {/*  BOTTOM CTA                                                   */}
+      {/* ============================================================ */}
+      <section className="relative bg-gradient-to-br from-slate-900 to-emerald-950 py-20 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-emerald-600/[0.06] blur-3xl" />
+        </div>
 
         <motion.div
-          variants={fadeUp}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.4 }}
-          custom={0}
-          className="relative max-w-xl mx-auto text-center space-y-6"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="relative mx-auto max-w-3xl px-4 text-center"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            พร้อมที่จะเริ่มประเมินชุมชนของคุณแล้วหรือยัง?
-          </h2>
-          <p className="text-white/80 text-base sm:text-lg">
-            ใช้เวลาเพียงไม่กี่นาที เพื่อค้นพบศักยภาพที่แท้จริงของชุมชน
-          </p>
-
-          <Button
-            size="lg"
-            onClick={handleStart}
-            disabled={loading}
-            className="bg-white text-red-700 hover:bg-amber-50 shadow-lg shadow-red-900/30 text-base px-8 py-6 rounded-xl gap-2 font-semibold transition-transform hover:scale-105"
+          <motion.div
+            variants={fadeUp}
+            custom={0}
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15"
           >
-            {loading ? 'กำลังโหลด...' : 'เริ่มทำแบบประเมิน'}
-            {!loading && <ArrowRight className="w-5 h-5" />}
-          </Button>
+            <Leaf className="h-8 w-8 text-emerald-400" />
+          </motion.div>
+
+          <motion.h2
+            variants={fadeUp}
+            custom={1}
+            className="text-3xl sm:text-4xl font-bold text-white"
+          >
+            พร้อมที่จะค้นพบศักยภาพชุมชนของคุณแล้วหรือยัง?
+          </motion.h2>
+
+          <motion.p
+            variants={fadeUp}
+            custom={2}
+            className="mt-4 text-lg text-slate-300 leading-relaxed"
+          >
+            เริ่มทำแบบประเมิน PCGA วันนี้
+            เพื่อรับผลวิเคราะห์และแนวทางการพัฒนาชุมชนที่เหมาะสม
+          </motion.p>
+
+          <motion.div variants={fadeUp} custom={3} className="mt-8">
+            <Button
+              onClick={handleStart}
+              size="lg"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-emerald-900/40 transition-all duration-200"
+            >
+              เริ่มทำแบบประเมินเลย
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </motion.div>
         </motion.div>
       </section>
 
       <Footer />
+
+      {/* ============================================================ */}
+      {/*  PRIVACY CONSENT MODAL                                        */}
+      {/* ============================================================ */}
+      <Dialog open={showPrivacyModal} onOpenChange={setShowPrivacyModal}>
+        <DialogContent className="sm:max-w-lg bg-slate-900 border-slate-700/60 text-white">
+          <DialogHeader>
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/15">
+              <Shield className="h-6 w-6 text-emerald-400" />
+            </div>
+            <DialogTitle className="text-center text-xl font-bold text-white">
+              ข้อตกลงและความเป็นส่วนตัว
+            </DialogTitle>
+            <DialogDescription className="mt-4 text-sm leading-relaxed text-slate-300 text-center">
+              แบบสอบถามนี้จัดทำขึ้นเพื่อประเมินศักยภาพและความพร้อมของชุมชน
+              ข้อมูลที่ท่านให้จะถูกเก็บรักษาเป็นความลับและนำไปใช้เพื่อการวิเคราะห์และออกแบบแนวทางการพัฒนาที่เหมาะสมกับชุมชนของท่านเท่านั้น
+              ข้อมูลจะไม่ถูกเปิดเผยต่อบุคคลภายนอกโดยไม่ได้รับความยินยอม
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={handleDecline}
+              className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+            >
+              ปฏิเสธ
+            </Button>
+            <Button
+              onClick={handleAccept}
+              disabled={!isAcceptEnabled || isLoading}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading
+                ? "กำลังโหลด..."
+                : countdown > 0
+                  ? `ยอมรับ (${countdown})`
+                  : "ยอมรับ"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
