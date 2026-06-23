@@ -247,7 +247,8 @@ export default function AssessmentQuiz() {
         }
 
         const maxRawScore = scoredQuestions.length * 5; // always 25 for 5 questions
-        const weightedScore = maxRawScore > 0 ? (rawScore / maxRawScore) * section.weight_percent : 0;
+        const weight = section.weight_percent ?? 0;
+        const weightedScore = maxRawScore > 0 ? (rawScore / maxRawScore) * weight : 0;
 
         dimensionScores.push({
           sectionId: section.id,
@@ -264,9 +265,12 @@ export default function AssessmentQuiz() {
 
       // 2. Determine result level
       let resultLevel: ResultLevel;
-      if (totalWeightedScore < 50) {
+      // Handle NaN fallback
+      const safeScore = isNaN(totalWeightedScore) ? 0 : totalWeightedScore;
+      
+      if (safeScore <= (form.seed_max_percent ?? 40)) {
         resultLevel = 'seed';
-      } else if (totalWeightedScore < 75) {
+      } else if (safeScore <= (form.sapling_max_percent ?? 70)) {
         resultLevel = 'sapling';
       } else {
         resultLevel = 'big_tree';

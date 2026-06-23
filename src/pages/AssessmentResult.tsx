@@ -226,8 +226,9 @@ const AssessmentResult = () => {
             rawScore += answerMap.get(q.id) || 0;
           }
           const maxRawScore = numScored * 5;
+          const weight = section.weight_percent ?? 0;
           const weightedScore =
-            maxRawScore > 0 ? (rawScore / maxRawScore) * section.weight_percent : 0;
+            maxRawScore > 0 ? (rawScore / maxRawScore) * weight : 0;
 
           const shortTitle =
             DIMENSION_SHORT_TITLES[section.title] ||
