@@ -189,34 +189,37 @@ const Assessment = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 font-prompt">
+      <div className="min-h-screen flex flex-col bg-stone-50 font-prompt">
         <Navbar />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="max-w-md w-full bg-white border-stone-200 p-8 text-center space-y-6 shadow-sm rounded-none">
-            <div className="mx-auto w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
-              <LogIn className="w-8 h-8 text-red-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-stone-900">
-              กรุณาเข้าสู่ระบบ
-            </h2>
-            <p className="text-stone-600 leading-relaxed font-light">
-              คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเริ่มทำแบบประเมิน PCGA ได้
-            </p>
-            <Button
-              asChild
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium rounded-none"
-            >
-              <Link to="/auth">
-                <LogIn className="mr-2 h-4 w-4" />
-                เข้าสู่ระบบ
-              </Link>
-            </Button>
-          </Card>
-        </motion.div>
+        <main className="flex-1 flex items-center justify-center px-4 py-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
+          >
+            <Card className="w-full bg-white border-stone-200 p-8 text-center space-y-6 shadow-sm rounded-none">
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+                <LogIn className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-stone-900">
+                กรุณาเข้าสู่ระบบ
+              </h2>
+              <p className="text-stone-600 leading-relaxed font-light">
+                คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเริ่มทำแบบประเมิน PCGA ได้
+              </p>
+              <Button
+                asChild
+                className="w-full h-12 md:h-10 text-base bg-red-600 hover:bg-red-700 text-white font-medium rounded-none"
+              >
+                <Link to="/auth">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  เข้าสู่ระบบ
+                </Link>
+              </Button>
+            </Card>
+          </motion.div>
+        </main>
         <Footer />
       </div>
     );
