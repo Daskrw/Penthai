@@ -113,6 +113,7 @@ const Assessment = () => {
   const { toast } = useToast();
 
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [isAcceptEnabled, setIsAcceptEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -142,8 +143,12 @@ const Assessment = () => {
   /* ---------- handlers ---------- */
 
   const handleStart = useCallback(() => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
     setShowPrivacyModal(true);
-  }, []);
+  }, [user]);
 
   const handleAccept = useCallback(async () => {
     setIsLoading(true);
@@ -182,48 +187,6 @@ const Assessment = () => {
     setShowPrivacyModal(false);
     navigate("/");
   }, [navigate]);
-
-  /* ---------------------------------------------------------------- */
-  /*  Auth Gate                                                        */
-  /* ---------------------------------------------------------------- */
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col bg-stone-50 font-prompt">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center px-4 py-12">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-md"
-          >
-            <Card className="w-full bg-white border-stone-200 p-8 text-center space-y-6 shadow-sm rounded-none">
-              <div className="mx-auto w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
-                <LogIn className="w-8 h-8 text-red-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-stone-900">
-                กรุณาเข้าสู่ระบบ
-              </h2>
-              <p className="text-stone-600 leading-relaxed font-light">
-                คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเริ่มทำแบบประเมิน PCGA ได้
-              </p>
-              <Button
-                asChild
-                className="w-full h-12 md:h-10 text-base bg-red-600 hover:bg-red-700 text-white font-medium rounded-none"
-              >
-                <Link to="/auth">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  เข้าสู่ระบบ
-                </Link>
-              </Button>
-            </Card>
-          </motion.div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   /* ---------------------------------------------------------------- */
   /*  Main Page                                                        */
@@ -525,6 +488,34 @@ const Assessment = () => {
                   : "ยอมรับ"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================ */}
+      {/*  LOGIN REQUIRED MODAL                                         */}
+      {/* ============================================================ */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="w-[90vw] max-w-md bg-white border border-stone-200 rounded-none shadow-xl p-8 text-center space-y-6">
+          <div className="mx-auto w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+            <LogIn className="w-8 h-8 text-red-600" />
+          </div>
+          <DialogTitle className="text-2xl font-bold text-stone-900">
+            กรุณาเข้าสู่ระบบ
+          </DialogTitle>
+          <DialogDescription className="text-stone-600 leading-relaxed font-light text-center">
+            คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเริ่มทำแบบประเมิน PCGA ได้
+          </DialogDescription>
+          <div className="mt-4">
+            <Button
+              asChild
+              className="w-full h-12 md:h-10 text-base bg-red-600 hover:bg-red-700 text-white font-medium rounded-none"
+            >
+              <Link to="/auth">
+                <LogIn className="mr-2 h-4 w-4" />
+                เข้าสู่ระบบ
+              </Link>
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
