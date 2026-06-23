@@ -212,7 +212,9 @@ export default function AssessmentQuiz() {
     if (currentSectionIndex < totalSections - 1) {
       setDirection(1);
       setCurrentSectionIndex((i) => i + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
     }
   }, [currentSectionIndex, totalSections]);
 
@@ -220,7 +222,9 @@ export default function AssessmentQuiz() {
     if (currentSectionIndex > 0) {
       setDirection(-1);
       setCurrentSectionIndex((i) => i - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
     }
   }, [currentSectionIndex]);
 

@@ -32,7 +32,7 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import heroBg from "@/assets/hero-banner-v2.png";
+import heroBg from "@/assets/image_4.png";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
