@@ -138,6 +138,7 @@ export default function AssessmentQuiz() {
             .map((section: AssessmentSectionWithQuestions) => ({
               ...section,
               assessment_questions: (section.assessment_questions ?? [])
+                .filter((q: AssessmentQuestionWithOptions) => q.question_type !== 'short_text' && q.question_type !== 'paragraph')
                 .sort((a: AssessmentQuestionWithOptions, b: AssessmentQuestionWithOptions) => a.sort_order - b.sort_order)
                 .map((q: AssessmentQuestionWithOptions) => ({
                   ...q,
@@ -385,24 +386,6 @@ export default function AssessmentQuiz() {
           </div>
 
           {/* Render by type */}
-          {question.question_type === 'short_text' && (
-            <Input
-              placeholder="พิมพ์คำตอบของคุณ..."
-              value={ans.text_answer ?? ''}
-              onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
-              className="max-w-xl border-stone-200 focus-visible:ring-red-700"
-            />
-          )}
-
-          {question.question_type === 'paragraph' && (
-            <Textarea
-              placeholder="พิมพ์คำตอบของคุณ..."
-              value={ans.text_answer ?? ''}
-              onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
-              className="max-w-xl border-stone-200 focus-visible:ring-red-700"
-              style={{ minHeight: 120 }}
-            />
-          )}
 
           {question.question_type === 'multi_select' && (
             <div className="grid gap-2 sm:grid-cols-2">
@@ -470,40 +453,45 @@ export default function AssessmentQuiz() {
           )}
 
           {question.question_type === 'scale' && (
-            <div className="flex flex-wrap items-end justify-center gap-2 sm:gap-4 py-2">
-              {[1, 2, 3, 4, 5].map((val) => {
-                const isSelected = ans.scale_value === val;
-                return (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => {
-                      updateAnswer(question.id, { scale_value: val });
-                      handleAutoScroll();
-                    }}
-                    className="group flex flex-col items-center gap-1.5"
-                  >
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-bold transition-all sm:h-14 sm:w-14 ${
-                        SCALE_COLORS[val]
-                      } ${
-                        isSelected
-                          ? `ring-4 ${SCALE_RING_COLORS[val]} scale-110`
-                          : 'opacity-70 hover:opacity-100 hover:scale-105'
-                      }`}
+            <div className="relative mt-8 mb-2 px-1 sm:px-4">
+              {/* Horizontal Connecting Line */}
+              <div className="absolute top-[22px] sm:top-[26px] left-[10%] right-[10%] h-1 bg-stone-200 -z-0 rounded-full"></div>
+              
+              <div className="flex justify-between items-start w-full relative z-10">
+                {[1, 2, 3, 4, 5].map((val) => {
+                  const isSelected = ans.scale_value === val;
+                  return (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => {
+                        updateAnswer(question.id, { scale_value: val });
+                        handleAutoScroll();
+                      }}
+                      className="group flex flex-col items-center flex-1 focus:outline-none"
                     >
-                      {val}
-                    </div>
-                    <span
-                      className={`max-w-[5rem] text-center text-[10px] leading-tight sm:text-xs ${
-                        isSelected ? 'font-semibold text-black' : 'text-stone-500'
-                      }`}
-                    >
-                      {PCGA_SCALE_LABELS[val]}
-                    </span>
-                  </button>
-                );
-              })}
+                      <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-bold transition-all sm:h-14 sm:w-14 shrink-0 ${
+                          SCALE_COLORS[val]
+                        } ${
+                          isSelected
+                            ? `ring-4 ${SCALE_RING_COLORS[val]} scale-110 shadow-md`
+                            : 'opacity-80 hover:opacity-100 hover:scale-105 border-[3px] border-white shadow-sm'
+                        }`}
+                      >
+                        {val}
+                      </div>
+                      <span
+                        className={`mt-3 max-w-[4.5rem] sm:max-w-[6rem] text-center text-[10px] leading-tight sm:text-xs transition-colors ${
+                          isSelected ? 'font-bold text-red-700' : 'font-medium text-stone-500 group-hover:text-stone-700'
+                        }`}
+                      >
+                        {PCGA_SCALE_LABELS[val]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
