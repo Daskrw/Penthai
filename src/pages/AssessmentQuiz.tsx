@@ -138,7 +138,12 @@ export default function AssessmentQuiz() {
             .map((section: AssessmentSectionWithQuestions) => ({
               ...section,
               assessment_questions: (section.assessment_questions ?? [])
-                .filter((q: AssessmentQuestionWithOptions) => q.question_type !== 'short_text' && q.question_type !== 'paragraph')
+                .filter((q: AssessmentQuestionWithOptions) => {
+                  // Keep all questions in Section 1 (General Info) where weight is 0
+                  if (section.weight_percent <= 0) return true;
+                  // Remove open-ended questions in scored dimensions
+                  return q.question_type !== 'short_text' && q.question_type !== 'paragraph';
+                })
                 .sort((a: AssessmentQuestionWithOptions, b: AssessmentQuestionWithOptions) => a.sort_order - b.sort_order)
                 .map((q: AssessmentQuestionWithOptions) => ({
                   ...q,
@@ -386,6 +391,24 @@ export default function AssessmentQuiz() {
           </div>
 
           {/* Render by type */}
+          {question.question_type === 'short_text' && (
+            <Input
+              placeholder="พิมพ์คำตอบของคุณ..."
+              value={ans.text_answer ?? ''}
+              onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
+              className="max-w-xl border-stone-200 focus-visible:ring-red-700"
+            />
+          )}
+
+          {question.question_type === 'paragraph' && (
+            <Textarea
+              placeholder="พิมพ์คำตอบของคุณ..."
+              value={ans.text_answer ?? ''}
+              onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
+              className="max-w-xl border-stone-200 focus-visible:ring-red-700"
+              style={{ minHeight: 120 }}
+            />
+          )}
 
           {question.question_type === 'multi_select' && (
             <div className="grid gap-2 sm:grid-cols-2">
