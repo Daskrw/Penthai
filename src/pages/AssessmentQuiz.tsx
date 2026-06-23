@@ -32,20 +32,21 @@ interface AnswerState {
 }
 
 // ─── Scale colour mapping ────────────────────────────────────────
+// Premium minimalist theme: Stone -> Brown -> Red
 const SCALE_COLORS: Record<number, string> = {
-  1: 'bg-amber-500',
-  2: 'bg-orange-400',
-  3: 'bg-yellow-400',
-  4: 'bg-teal-400',
-  5: 'bg-emerald-500',
+  1: 'bg-stone-200 text-stone-800',
+  2: 'bg-stone-400 text-stone-900',
+  3: 'bg-[#5C4033] text-white', // Brown
+  4: 'bg-red-600 text-white',
+  5: 'bg-red-800 text-white',
 };
 
 const SCALE_RING_COLORS: Record<number, string> = {
-  1: 'ring-amber-500/40',
-  2: 'ring-orange-400/40',
-  3: 'ring-yellow-400/40',
-  4: 'ring-teal-400/40',
-  5: 'ring-emerald-500/40',
+  1: 'ring-stone-200/50',
+  2: 'ring-stone-400/50',
+  3: 'ring-[#5C4033]/40',
+  4: 'ring-red-600/40',
+  5: 'ring-red-800/40',
 };
 
 // ─── Slide animation variants ────────────────────────────────────
@@ -349,14 +350,14 @@ export default function AssessmentQuiz() {
           {/* Question header */}
           <div className="flex items-start gap-2">
             {question.question_number && (
-              <span className="mt-0.5 shrink-0 font-semibold text-teal-600">
+              <span className="mt-0.5 shrink-0 font-semibold text-red-700">
                 {question.question_number}
               </span>
             )}
-            <p className="text-sm font-medium leading-relaxed text-gray-800 sm:text-base">
+            <p className="text-sm font-medium leading-relaxed text-black sm:text-base">
               {question.question_text}
               {optional && (
-                <span className="ml-1 text-xs text-gray-400">(ไม่บังคับ)</span>
+                <span className="ml-1 text-xs text-stone-400">(ไม่บังคับ)</span>
               )}
             </p>
           </div>
@@ -367,7 +368,7 @@ export default function AssessmentQuiz() {
               placeholder="พิมพ์คำตอบของคุณ..."
               value={ans.text_answer ?? ''}
               onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
-              className="max-w-xl"
+              className="max-w-xl border-stone-200 focus-visible:ring-red-700"
             />
           )}
 
@@ -376,7 +377,7 @@ export default function AssessmentQuiz() {
               placeholder="พิมพ์คำตอบของคุณ..."
               value={ans.text_answer ?? ''}
               onChange={(e) => updateAnswer(question.id, { text_answer: e.target.value })}
-              className="max-w-xl"
+              className="max-w-xl border-stone-200 focus-visible:ring-red-700"
               style={{ minHeight: 120 }}
             />
           )}
@@ -390,12 +391,13 @@ export default function AssessmentQuiz() {
                     key={opt.id}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                       selected
-                        ? 'border-teal-500 bg-teal-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-red-700 bg-red-50/50'
+                        : 'border-stone-200 hover:border-stone-300'
                     }`}
                   >
                     <Checkbox
                       checked={selected}
+                      className="data-[state=checked]:bg-red-700 data-[state=checked]:border-red-700"
                       onCheckedChange={(checked) => {
                         const prev = ans.selected_options ?? [];
                         const next = checked
@@ -404,7 +406,7 @@ export default function AssessmentQuiz() {
                         updateAnswer(question.id, { selected_options: next });
                       }}
                     />
-                    <span className="text-sm">{opt.option_text}</span>
+                    <span className="text-sm text-black">{opt.option_text}</span>
                   </label>
                 );
               })}
@@ -426,12 +428,16 @@ export default function AssessmentQuiz() {
                     key={opt.id}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                       selected
-                        ? 'border-teal-500 bg-teal-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-red-700 bg-red-50/50'
+                        : 'border-stone-200 hover:border-stone-300'
                     }`}
                   >
-                    <RadioGroupItem value={opt.id} id={opt.id} />
-                    <Label htmlFor={opt.id} className="cursor-pointer text-sm">
+                    <RadioGroupItem 
+                      value={opt.id} 
+                      id={opt.id} 
+                      className="text-red-700 data-[state=checked]:border-red-700"
+                    />
+                    <Label htmlFor={opt.id} className="cursor-pointer text-sm text-black">
                       {opt.option_text}
                     </Label>
                   </label>
@@ -452,7 +458,7 @@ export default function AssessmentQuiz() {
                     className="group flex flex-col items-center gap-1.5"
                   >
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white transition-all sm:h-12 sm:w-12 ${
+                      className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold transition-all sm:h-12 sm:w-12 ${
                         SCALE_COLORS[val]
                       } ${
                         isSelected
@@ -464,7 +470,7 @@ export default function AssessmentQuiz() {
                     </div>
                     <span
                       className={`max-w-[5rem] text-center text-[10px] leading-tight sm:text-xs ${
-                        isSelected ? 'font-semibold text-gray-800' : 'text-gray-500'
+                        isSelected ? 'font-semibold text-black' : 'text-stone-500'
                       }`}
                     >
                       {PCGA_SCALE_LABELS[val]}
@@ -487,8 +493,8 @@ export default function AssessmentQuiz() {
   // Auth loading
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <Loader2 className="h-8 w-8 animate-spin text-red-700" />
       </div>
     );
   }
@@ -496,12 +502,12 @@ export default function AssessmentQuiz() {
   // Not logged in
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
-          <h2 className="text-xl font-semibold text-gray-800">กรุณาเข้าสู่ระบบ</h2>
-          <p className="text-gray-500">คุณต้องเข้าสู่ระบบก่อนทำแบบประเมิน</p>
-          <Button onClick={() => navigate('/login')} className="mt-2">
+          <h2 className="text-xl font-semibold text-black">กรุณาเข้าสู่ระบบ</h2>
+          <p className="text-stone-500">คุณต้องเข้าสู่ระบบก่อนทำแบบประเมิน</p>
+          <Button onClick={() => navigate('/login')} className="mt-2 bg-red-700 hover:bg-red-800 text-white">
             เข้าสู่ระบบ
           </Button>
         </main>
@@ -513,11 +519,11 @@ export default function AssessmentQuiz() {
   // Loading form
   if (loadingForm) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-          <p className="text-sm text-gray-500">กำลังโหลดแบบประเมิน...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-red-700" />
+          <p className="text-sm text-stone-500">กำลังโหลดแบบประเมิน...</p>
         </main>
         <Footer />
       </div>
@@ -527,12 +533,12 @@ export default function AssessmentQuiz() {
   // No form found
   if (!form || totalSections === 0) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
-          <h2 className="text-xl font-semibold text-gray-800">ไม่พบแบบประเมิน</h2>
-          <p className="text-gray-500">ไม่พบแบบประเมินที่ระบุ หรือยังไม่มีคำถามในแบบประเมินนี้</p>
-          <Button variant="outline" onClick={() => navigate('/assessment')}>
+          <h2 className="text-xl font-semibold text-black">ไม่พบแบบประเมิน</h2>
+          <p className="text-stone-500">ไม่พบแบบประเมินที่ระบุ หรือยังไม่มีคำถามในแบบประเมินนี้</p>
+          <Button variant="outline" onClick={() => navigate('/assessment')} className="border-stone-200 text-black hover:bg-stone-50">
             กลับหน้าประเมิน
           </Button>
         </main>
@@ -542,28 +548,28 @@ export default function AssessmentQuiz() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
       <Navbar />
 
       <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           {/* ── Form title ──────────────────────────────────── */}
           <div className="mb-6 text-center">
-            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{form.title}</h1>
+            <h1 className="text-xl font-bold text-black sm:text-2xl">{form.title}</h1>
             {form.instructions && (
-              <p className="mt-2 text-sm text-gray-500">{form.instructions}</p>
+              <p className="mt-2 text-sm text-stone-500">{form.instructions}</p>
             )}
           </div>
 
           {/* ── Progress bar ────────────────────────────────── */}
           <div className="mb-6 space-y-1">
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center justify-between text-xs text-stone-500">
               <span>
                 ส่วนที่ {currentSectionIndex + 1} จาก {totalSections}
               </span>
               <span>{Math.round(progressPercent)}%</span>
             </div>
-            <Progress value={progressPercent} className="h-2" />
+            <Progress value={progressPercent} className="h-2 bg-stone-200 [&>div]:bg-red-700" />
           </div>
 
           {/* ── Section content ─────────────────────────────── */}
@@ -579,19 +585,19 @@ export default function AssessmentQuiz() {
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
               >
                 {/* Section header */}
-                <div className="mb-6 rounded-xl border border-teal-100 bg-white p-5 shadow-sm">
+                <div className="mb-6 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-black">
                       {currentSection.title}
                     </h2>
                     {currentSection.weight_percent > 0 && (
-                      <Badge variant="secondary" className="bg-teal-50 text-teal-700">
+                      <Badge variant="secondary" className="bg-[#5C4033]/10 text-[#5C4033] border border-[#5C4033]/20 hover:bg-[#5C4033]/20">
                         น้ำหนัก {currentSection.weight_percent}%
                       </Badge>
                     )}
                   </div>
                   {currentSection.description && (
-                    <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                    <p className="mt-2 text-sm leading-relaxed text-stone-500">
                       {currentSection.description}
                     </p>
                   )}
@@ -602,7 +608,7 @@ export default function AssessmentQuiz() {
                   {currentSection.assessment_questions.map((q) => (
                     <div
                       key={q.id}
-                      className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm"
+                      className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
                     >
                       {renderQuestion(q, currentSection.assessment_questions)}
                     </div>
@@ -618,7 +624,7 @@ export default function AssessmentQuiz() {
               variant="outline"
               onClick={goBack}
               disabled={currentSectionIndex === 0}
-              className="gap-1"
+              className="gap-1 border-stone-200 text-black hover:bg-stone-50"
             >
               <ChevronLeft className="h-4 w-4" />
               ย้อนกลับ
@@ -628,7 +634,7 @@ export default function AssessmentQuiz() {
               <Button
                 onClick={handleSubmit}
                 disabled={!isSectionValid() || submitting}
-                className="gap-1 bg-teal-600 hover:bg-teal-700"
+                className="gap-1 bg-red-700 hover:bg-red-800 text-white"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -641,7 +647,7 @@ export default function AssessmentQuiz() {
               <Button
                 onClick={goNext}
                 disabled={!isSectionValid()}
-                className="gap-1 bg-teal-600 hover:bg-teal-700"
+                className="gap-1 bg-red-700 hover:bg-red-800 text-white"
               >
                 ถัดไป
                 <ChevronRight className="h-4 w-4" />

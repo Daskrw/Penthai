@@ -15,14 +15,27 @@ import {
   type DimensionScore,
 } from '@/types/assessment';
 
+// ─── Theme Colors ────────────────────────────────────────────────────────────
+const THEME = {
+  bg: '#FAFAFA',
+  cardBg: '#FFFFFF',
+  text: '#171717',
+  textMuted: '#525252',
+  red: '#B91C1C',
+  brown: '#5C4033',
+  brownLight: 'rgba(92, 64, 51, 0.15)',
+  redLight: 'rgba(185, 28, 28, 0.1)',
+};
+
 // ─── Radar Chart Component ───────────────────────────────────────────────────
 
 interface RadarChartProps {
   dimensions: DimensionScore[];
-  color: string;
+  fillColor: string;
+  strokeColor: string;
 }
 
-const RadarChart = ({ dimensions, color }: RadarChartProps) => {
+const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => {
   const size = 300;
   const center = size / 2;
   const maxRadius = size / 2 - 40;
@@ -59,10 +72,9 @@ const RadarChart = ({ dimensions, color }: RadarChartProps) => {
             key={`grid-${level}`}
             d={path}
             fill="none"
-            stroke="currentColor"
+            stroke={strokeColor}
             strokeWidth={0.5}
-            className="text-border"
-            opacity={0.5}
+            opacity={0.3}
           />
         );
       })}
@@ -77,10 +89,9 @@ const RadarChart = ({ dimensions, color }: RadarChartProps) => {
             y1={center}
             x2={end.x}
             y2={end.y}
-            stroke="currentColor"
+            stroke={strokeColor}
             strokeWidth={0.5}
-            className="text-border"
-            opacity={0.5}
+            opacity={0.3}
           />
         );
       })}
@@ -88,9 +99,9 @@ const RadarChart = ({ dimensions, color }: RadarChartProps) => {
       {/* Data polygon */}
       <motion.path
         d={dataPath}
-        fill={color}
+        fill={fillColor}
         fillOpacity={0.3}
-        stroke={color}
+        stroke={strokeColor}
         strokeWidth={2}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -105,8 +116,8 @@ const RadarChart = ({ dimensions, color }: RadarChartProps) => {
           cx={p.x}
           cy={p.y}
           r={4}
-          fill={color}
-          stroke="white"
+          fill={fillColor}
+          stroke={strokeColor}
           strokeWidth={2}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -124,7 +135,8 @@ const RadarChart = ({ dimensions, color }: RadarChartProps) => {
             y={labelPoint.y}
             textAnchor="middle"
             dominantBaseline="central"
-            className="fill-foreground text-[10px] font-medium"
+            style={{ fill: THEME.text }}
+            className="text-[10px] font-medium"
           >
             {d.shortTitle}
           </text>
@@ -254,9 +266,12 @@ const AssessmentResult = () => {
     return (
       <>
         <Navbar />
-        <main className="min-h-[80vh] flex flex-col items-center justify-center bg-background">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground text-lg">กำลังประมวลผล...</p>
+        <main
+          className="min-h-[80vh] flex flex-col items-center justify-center"
+          style={{ backgroundColor: THEME.bg }}
+        >
+          <Loader2 className="h-12 w-12 animate-spin mb-4" style={{ color: THEME.red }} />
+          <p className="text-lg" style={{ color: THEME.textMuted }}>กำลังประมวลผล...</p>
         </main>
         <Footer />
       </>
@@ -269,11 +284,20 @@ const AssessmentResult = () => {
     return (
       <>
         <Navbar />
-        <main className="min-h-[80vh] flex items-center justify-center bg-background px-4">
+        <main
+          className="min-h-[80vh] flex items-center justify-center px-4"
+          style={{ backgroundColor: THEME.bg }}
+        >
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">กรุณาเข้าสู่ระบบ</h2>
-            <p className="text-muted-foreground">คุณต้องเข้าสู่ระบบเพื่อดูผลการประเมิน</p>
-            <Button onClick={() => navigate('/auth')}>เข้าสู่ระบบ</Button>
+            <h2 className="text-2xl font-bold" style={{ color: THEME.text }}>กรุณาเข้าสู่ระบบ</h2>
+            <p style={{ color: THEME.textMuted }}>คุณต้องเข้าสู่ระบบเพื่อดูผลการประเมิน</p>
+            <Button
+              onClick={() => navigate('/auth')}
+              style={{ backgroundColor: THEME.red, color: 'white' }}
+              className="hover:opacity-90"
+            >
+              เข้าสู่ระบบ
+            </Button>
           </div>
         </main>
         <Footer />
@@ -287,12 +311,19 @@ const AssessmentResult = () => {
     return (
       <>
         <Navbar />
-        <main className="min-h-[80vh] flex items-center justify-center bg-background px-4">
+        <main
+          className="min-h-[80vh] flex items-center justify-center px-4"
+          style={{ backgroundColor: THEME.bg }}
+        >
           <div className="text-center space-y-4 max-w-md">
-            <AlertCircle className="h-16 w-16 text-destructive mx-auto" />
-            <h2 className="text-2xl font-bold">เกิดข้อผิดพลาด</h2>
-            <p className="text-muted-foreground">{error}</p>
-            <Button onClick={() => navigate('/assessment')} className="mt-4">
+            <AlertCircle className="h-16 w-16 mx-auto" style={{ color: THEME.red }} />
+            <h2 className="text-2xl font-bold" style={{ color: THEME.text }}>เกิดข้อผิดพลาด</h2>
+            <p style={{ color: THEME.textMuted }}>{error}</p>
+            <Button
+              onClick={() => navigate('/assessment')}
+              className="mt-4 hover:opacity-90"
+              style={{ backgroundColor: THEME.red, color: 'white' }}
+            >
               กลับไปหน้าประเมิน
             </Button>
           </div>
@@ -307,7 +338,8 @@ const AssessmentResult = () => {
   const levelKey: ResultLevel = response.result_level || 'seed';
   const levelData = RESULT_LEVELS[levelKey];
   const percent = response.score_percent ?? 0;
-  const totalScore = response.total_score ?? 0;
+  // totalScore is unused directly in display here but fetched:
+  // const totalScore = response.total_score ?? 0;
 
   // SVG circle animation constants
   const circleRadius = 80;
@@ -317,19 +349,25 @@ const AssessmentResult = () => {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background pb-20">
-        {/* ──────── 1. Gradient Header ──────── */}
-        <div className={`pt-20 pb-32 px-4 bg-gradient-to-b ${levelData.bgGradient} text-white`}>
+      <main className="min-h-screen pb-20" style={{ backgroundColor: THEME.bg }}>
+        {/* ──────── 1. Header ──────── */}
+        <div
+          className="pt-20 pb-32 px-4 border-b border-opacity-20"
+          style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brown }}
+        >
           <div className="container mx-auto max-w-3xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-3xl md:text-5xl font-bold mb-4 drop-shadow-md">
+              <h1
+                className="text-3xl md:text-5xl font-bold mb-4 tracking-tight"
+                style={{ color: THEME.text }}
+              >
                 ผลการประเมิน PCGA
               </h1>
-              <p className="text-white/90 text-lg md:text-xl font-medium drop-shadow-sm">
+              <p className="text-lg md:text-xl font-medium" style={{ color: THEME.textMuted }}>
                 {response.assessment_forms?.title}
               </p>
             </motion.div>
@@ -343,7 +381,10 @@ const AssessmentResult = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <Card className="rounded-3xl shadow-2xl border border-border">
+            <Card
+              className="rounded-3xl shadow-xl border"
+              style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brownLight }}
+            >
               <CardContent className="p-8 md:p-12 text-center">
                 {/* Animated Score Circle */}
                 <div className="flex justify-center mb-8">
@@ -357,7 +398,8 @@ const AssessmentResult = () => {
                         cx="100"
                         cy="100"
                         r={circleRadius}
-                        className="stroke-muted fill-transparent"
+                        fill="transparent"
+                        stroke={THEME.brownLight}
                         strokeWidth={10}
                       />
                       {/* Animated score arc */}
@@ -365,8 +407,8 @@ const AssessmentResult = () => {
                         cx="100"
                         cy="100"
                         r={circleRadius}
-                        className="fill-transparent"
-                        stroke={levelData.color}
+                        fill="transparent"
+                        stroke={THEME.red}
                         strokeWidth={10}
                         strokeLinecap="round"
                         initial={{ strokeDasharray: `0 ${circumference}` }}
@@ -377,14 +419,16 @@ const AssessmentResult = () => {
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <motion.span
                         className="text-5xl md:text-6xl font-bold"
-                        style={{ color: levelData.color }}
+                        style={{ color: THEME.text }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1, duration: 0.6 }}
                       >
                         {Math.round(percent)}
                       </motion.span>
-                      <span className="text-sm text-muted-foreground mt-1">/100 คะแนน</span>
+                      <span className="text-sm mt-1" style={{ color: THEME.textMuted }}>
+                        /100 คะแนน
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -396,30 +440,39 @@ const AssessmentResult = () => {
                   transition={{ delay: 1, duration: 0.5 }}
                   className="space-y-4"
                 >
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted/50 text-5xl">
+                  <div
+                    className="inline-flex items-center justify-center w-20 h-20 rounded-full text-5xl"
+                    style={{ backgroundColor: THEME.bg }}
+                  >
                     {levelData.icon}
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold tracking-wider uppercase text-muted-foreground mb-1">
+                    <h2
+                      className="text-sm font-bold tracking-wider uppercase mb-1"
+                      style={{ color: THEME.textMuted }}
+                    >
                       ระดับชุมชนของคุณ
                     </h2>
                     <h3
                       className="text-3xl md:text-4xl font-extrabold mb-1"
-                      style={{ color: levelData.color }}
+                      style={{ color: THEME.red }}
                     >
                       {levelData.thaiName}
                     </h3>
-                    <p className="text-base text-muted-foreground font-medium">
+                    <p className="text-base font-medium" style={{ color: THEME.textMuted }}>
                       {levelData.label}
                     </p>
                     <span
-                      className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-semibold text-white"
-                      style={{ backgroundColor: levelData.color }}
+                      className="inline-block mt-3 px-4 py-1.5 rounded-full text-sm font-semibold text-white shadow-sm"
+                      style={{ backgroundColor: THEME.brown }}
                     >
                       {levelData.scoreRange}
                     </span>
                   </div>
-                  <p className="text-base text-muted-foreground leading-relaxed max-w-xl mx-auto pt-2">
+                  <p
+                    className="text-base leading-relaxed max-w-xl mx-auto pt-4"
+                    style={{ color: THEME.textMuted }}
+                  >
                     {levelData.description}
                   </p>
                 </motion.div>
@@ -436,12 +489,22 @@ const AssessmentResult = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
             >
-              <Card className="rounded-2xl shadow-lg border border-border">
+              <Card
+                className="rounded-2xl shadow-lg border"
+                style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brownLight }}
+              >
                 <CardContent className="p-6 md:p-10">
-                  <h2 className="text-xl md:text-2xl font-bold text-center mb-6">
+                  <h2
+                    className="text-xl md:text-2xl font-bold text-center mb-6"
+                    style={{ color: THEME.text }}
+                  >
                     แผนภูมิมิติการประเมิน
                   </h2>
-                  <RadarChart dimensions={dimensions} color={levelData.color} />
+                  <RadarChart
+                    dimensions={dimensions}
+                    fillColor={THEME.red}
+                    strokeColor={THEME.brown}
+                  />
                 </CardContent>
               </Card>
             </motion.div>
@@ -456,12 +519,18 @@ const AssessmentResult = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
             >
-              <Card className="rounded-2xl shadow-lg border border-border">
+              <Card
+                className="rounded-2xl shadow-lg border"
+                style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brownLight }}
+              >
                 <CardContent className="p-6 md:p-10">
-                  <h2 className="text-xl md:text-2xl font-bold mb-6">
+                  <h2
+                    className="text-xl md:text-2xl font-bold mb-8"
+                    style={{ color: THEME.text }}
+                  >
                     รายละเอียดคะแนนรายมิติ
                   </h2>
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     {dimensions.map((dim, i) => {
                       const pct =
                         dim.maxRawScore > 0
@@ -475,28 +544,37 @@ const AssessmentResult = () => {
                           transition={{ delay: 1 + i * 0.12, duration: 0.4 }}
                         >
                           {/* Title row */}
-                          <div className="flex items-center justify-between mb-1.5">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-sm md:text-base font-semibold text-foreground truncate">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span
+                                className="text-sm md:text-base font-semibold truncate"
+                                style={{ color: THEME.text }}
+                              >
                                 {dim.title}
                               </span>
-                              <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                              <span
+                                className="shrink-0 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                                style={{ backgroundColor: THEME.brownLight, color: THEME.brown }}
+                              >
                                 น้ำหนัก {dim.weight}%
                               </span>
                             </div>
                             <span
                               className="text-sm font-bold shrink-0 ml-2"
-                              style={{ color: levelData.color }}
+                              style={{ color: THEME.red }}
                             >
                               {dim.weightedScore.toFixed(1)} คะแนน
                             </span>
                           </div>
 
                           {/* Bar */}
-                          <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="relative h-2.5 rounded-full overflow-hidden"
+                            style={{ backgroundColor: THEME.redLight }}
+                          >
                             <motion.div
                               className="absolute inset-y-0 left-0 rounded-full"
-                              style={{ backgroundColor: levelData.color }}
+                              style={{ backgroundColor: THEME.red }}
                               initial={{ width: '0%' }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 1, delay: 1.2 + i * 0.12, ease: 'easeOut' }}
@@ -504,7 +582,10 @@ const AssessmentResult = () => {
                           </div>
 
                           {/* Sub-label */}
-                          <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                          <div
+                            className="flex justify-between mt-1.5 text-xs font-medium"
+                            style={{ color: THEME.textMuted }}
+                          >
                             <span>
                               {dim.rawScore} / {dim.maxRawScore} คะแนนดิบ
                             </span>
@@ -516,14 +597,17 @@ const AssessmentResult = () => {
                   </div>
 
                   {/* Weighted total summary */}
-                  <div className="mt-8 pt-6 border-t border-border">
+                  <div
+                    className="mt-8 pt-6 border-t"
+                    style={{ borderColor: THEME.brownLight }}
+                  >
                     <div className="flex items-center justify-between">
-                      <span className="text-base font-bold text-foreground">
+                      <span className="text-base font-bold" style={{ color: THEME.text }}>
                         คะแนนถ่วงน้ำหนักรวม
                       </span>
                       <span
                         className="text-2xl font-extrabold"
-                        style={{ color: levelData.color }}
+                        style={{ color: THEME.red }}
                       >
                         {Math.round(percent)} / 100
                       </span>
@@ -544,13 +628,22 @@ const AssessmentResult = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link to="/assessment" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full gap-2 text-base">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full gap-2 text-base hover:bg-gray-50"
+                style={{ borderColor: THEME.brown, color: THEME.brown }}
+              >
                 <RefreshCw className="h-4 w-4" />
                 ทำแบบประเมินอีกครั้ง
               </Button>
             </Link>
             <Link to="/" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full gap-2 text-base bg-primary hover:bg-primary/90">
+              <Button
+                size="lg"
+                className="w-full gap-2 text-base hover:opacity-90"
+                style={{ backgroundColor: THEME.red, color: 'white' }}
+              >
                 <Home className="h-4 w-4" />
                 กลับหน้าหลัก
               </Button>

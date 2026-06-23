@@ -45,11 +45,10 @@ const TIERS = [
     range: "0-49 คะแนน",
     description:
       "ชุมชนที่มีทุนทางวัฒนธรรมและศักยภาพพื้นฐาน แต่ยังไม่ได้รับการพัฒนาอย่างเป็นระบบ",
-    gradient: "from-amber-500/20 to-orange-600/20",
-    border: "border-amber-500/30",
-    badge: "bg-amber-500/20 text-amber-300",
+    border: "border-amber-900/20",
+    badge: "bg-amber-900/10 text-amber-900",
     icon: Sprout,
-    iconColor: "text-amber-400",
+    iconColor: "text-amber-900",
   },
   {
     emoji: "🌿",
@@ -58,11 +57,10 @@ const TIERS = [
     range: "50-74 คะแนน",
     description:
       "ชุมชนที่เริ่มนำทุนทางวัฒนธรรมมาต่อยอดผ่านกระบวนการสร้างสรรค์",
-    gradient: "from-teal-500/20 to-cyan-600/20",
-    border: "border-teal-500/30",
-    badge: "bg-teal-500/20 text-teal-300",
+    border: "border-amber-900/20",
+    badge: "bg-amber-900/10 text-amber-900",
     icon: TreePine,
-    iconColor: "text-teal-400",
+    iconColor: "text-amber-900",
   },
   {
     emoji: "🌳",
@@ -71,11 +69,10 @@ const TIERS = [
     range: "75-100 คะแนน",
     description:
       "ชุมชนที่สามารถสร้างรายได้จากทุนทางวัฒนธรรมได้อย่างต่อเนื่อง",
-    gradient: "from-emerald-500/20 to-green-600/20",
-    border: "border-emerald-500/30",
-    badge: "bg-emerald-500/20 text-emerald-300",
+    border: "border-amber-900/20",
+    badge: "bg-amber-900/10 text-amber-900",
     icon: Trees,
-    iconColor: "text-emerald-400",
+    iconColor: "text-amber-900",
   },
 ] as const;
 
@@ -191,26 +188,26 @@ const Assessment = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 font-sans">
         <Navbar />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="max-w-md w-full bg-slate-800/60 backdrop-blur-xl border-slate-700/50 p-8 text-center space-y-6 shadow-2xl">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center">
-              <LogIn className="w-8 h-8 text-emerald-400" />
+          <Card className="max-w-md w-full bg-white border-stone-200 p-8 text-center space-y-6 shadow-sm rounded-none">
+            <div className="mx-auto w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+              <LogIn className="w-8 h-8 text-red-600" />
             </div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-stone-900">
               กรุณาเข้าสู่ระบบ
             </h2>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-stone-600 leading-relaxed font-light">
               คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเริ่มทำแบบประเมิน PCGA ได้
             </p>
             <Button
               asChild
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium"
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium rounded-none"
             >
               <Link to="/auth">
                 <LogIn className="mr-2 h-4 w-4" />
@@ -229,42 +226,13 @@ const Assessment = () => {
   /* ---------------------------------------------------------------- */
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans selection:bg-red-100 selection:text-red-900">
       <Navbar />
 
       {/* ============================================================ */}
       {/*  HERO                                                         */}
       {/* ============================================================ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 pt-28 pb-24 lg:pt-36 lg:pb-32">
-        {/* Decorative floating organic shapes */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {/* Large soft circle */}
-          <div className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-emerald-600/[0.07] blur-3xl" />
-          <div className="absolute bottom-0 -left-24 h-[400px] w-[400px] rounded-full bg-teal-600/[0.06] blur-3xl" />
-
-          {/* Floating leaf shapes (CSS only) */}
-          <motion.div
-            animate={{ y: [0, -18, 0], rotate: [0, 8, 0] }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-24 right-[18%] h-10 w-5 rounded-[50%_50%_50%_0%] rotate-45 bg-emerald-500/10"
-          />
-          <motion.div
-            animate={{ y: [0, 14, 0], rotate: [0, -6, 0] }}
-            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[40%] left-[12%] h-8 w-4 rounded-[50%_50%_50%_0%] rotate-[120deg] bg-teal-400/10"
-          />
-          <motion.div
-            animate={{ y: [0, -10, 0], rotate: [0, 12, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-24 right-[30%] h-12 w-6 rounded-[50%_50%_50%_0%] -rotate-12 bg-green-400/10"
-          />
-          <motion.div
-            animate={{ y: [0, 10, 0], x: [0, -6, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[55%] right-[8%] h-6 w-3 rounded-[50%_50%_50%_0%] rotate-[200deg] bg-emerald-300/10"
-          />
-        </div>
-
+      <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="relative mx-auto max-w-5xl px-4 text-center">
           <motion.div
             initial="hidden"
@@ -272,9 +240,9 @@ const Assessment = () => {
             viewport={{ once: true }}
             variants={stagger}
           >
-            <motion.div variants={fadeUp} custom={0} className="mb-4">
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400 ring-1 ring-emerald-500/20">
-                <Leaf className="h-4 w-4" />
+            <motion.div variants={fadeUp} custom={0} className="mb-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-4 py-1.5 text-sm font-medium text-stone-600 border border-stone-200">
+                <Leaf className="h-4 w-4 text-red-600" />
                 Community Assessment Tool
               </span>
             </motion.div>
@@ -282,7 +250,7 @@ const Assessment = () => {
             <motion.h1
               variants={fadeUp}
               custom={1}
-              className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-white"
+              className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-stone-900 uppercase"
             >
               PCGA
             </motion.h1>
@@ -290,7 +258,7 @@ const Assessment = () => {
             <motion.p
               variants={fadeUp}
               custom={2}
-              className="mt-2 text-lg sm:text-xl font-medium text-emerald-300/90"
+              className="mt-4 text-lg sm:text-xl font-medium text-red-600 tracking-wide"
             >
               Penthai Community Growth Assessment
             </motion.p>
@@ -298,19 +266,19 @@ const Assessment = () => {
             <motion.p
               variants={fadeUp}
               custom={3}
-              className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300"
+              className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-stone-600 font-light"
             >
-              เครื่องมือประเมินศักยภาพและความพร้อมของชุมชนเพื่อการพัฒนา
+              เครื่องมือประเมินศักยภาพและความพร้อมของชุมชนเพื่อการพัฒนาอย่างยั่งยืน
             </motion.p>
 
-            <motion.div variants={fadeUp} custom={4} className="mt-10">
+            <motion.div variants={fadeUp} custom={4} className="mt-12">
               <Button
                 onClick={handleStart}
                 size="lg"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-emerald-900/40 transition-all duration-200"
+                className="bg-red-600 hover:bg-red-700 text-white px-10 py-7 text-lg font-medium rounded-none transition-all duration-300 hover:shadow-[4px_4px_0px_0px_rgba(68,28,19,0.2)]"
               >
                 เริ่มทำแบบประเมิน
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
             </motion.div>
           </motion.div>
@@ -320,26 +288,26 @@ const Assessment = () => {
       {/* ============================================================ */}
       {/*  THREE-TIER GROWTH VISUALIZATION                              */}
       {/* ============================================================ */}
-      <section className="relative bg-slate-950 py-20 lg:py-28">
+      <section className="relative bg-white py-20 lg:py-32 border-y border-stone-200">
         <div className="mx-auto max-w-6xl px-4">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={stagger}
-            className="text-center mb-14"
+            className="text-center mb-16"
           >
             <motion.h2
               variants={fadeUp}
               custom={0}
-              className="text-3xl sm:text-4xl font-bold text-white"
+              className="text-3xl sm:text-4xl font-bold text-stone-900"
             >
               ระดับการเติบโตของชุมชน
             </motion.h2>
             <motion.p
               variants={fadeUp}
               custom={1}
-              className="mt-3 text-slate-400 max-w-xl mx-auto"
+              className="mt-4 text-stone-600 max-w-xl mx-auto font-light"
             >
               ผลการประเมินจะจัดชุมชนของคุณเข้าสู่หนึ่งในสามระดับการเติบโต
             </motion.p>
@@ -350,36 +318,36 @@ const Assessment = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
             variants={stagger}
-            className="grid gap-6 md:grid-cols-3"
+            className="grid gap-8 md:grid-cols-3"
           >
             {TIERS.map((tier, i) => {
               const Icon = tier.icon;
               return (
                 <motion.div key={tier.label} variants={fadeUp} custom={i}>
                   <Card
-                    className={`group relative h-full overflow-hidden bg-gradient-to-br ${tier.gradient} backdrop-blur-sm border ${tier.border} p-7 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
+                    className={`group relative h-full bg-stone-50 rounded-none border ${tier.border} p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-md`}
                   >
                     {/* Icon */}
-                    <div className="mb-4 flex items-center gap-3">
+                    <div className="mb-6 flex items-center gap-4">
                       <span className="text-4xl">{tier.emoji}</span>
                       <Icon className={`h-6 w-6 ${tier.iconColor}`} />
                     </div>
 
                     {/* Title & Range */}
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-xl font-bold text-stone-900">
                       {tier.label}
                     </h3>
-                    <p className="text-sm font-medium text-slate-300 mt-0.5">
+                    <p className="text-sm font-medium text-stone-500 mt-1">
                       {tier.labelEn}
                     </p>
                     <span
-                      className={`mt-3 inline-block rounded-full px-3 py-1 text-xs font-semibold ${tier.badge}`}
+                      className={`mt-4 inline-block px-3 py-1 text-xs font-semibold uppercase tracking-wider ${tier.badge}`}
                     >
                       {tier.range}
                     </span>
 
                     {/* Description */}
-                    <p className="mt-4 text-sm leading-relaxed text-slate-300">
+                    <p className="mt-6 text-sm leading-relaxed text-stone-600 font-light">
                       {tier.description}
                     </p>
                   </Card>
@@ -393,26 +361,26 @@ const Assessment = () => {
       {/* ============================================================ */}
       {/*  SIX-DIMENSION PREVIEW GRID                                   */}
       {/* ============================================================ */}
-      <section className="relative bg-gradient-to-b from-slate-950 to-slate-900 py-20 lg:py-28">
+      <section className="relative bg-stone-50 py-20 lg:py-32">
         <div className="mx-auto max-w-6xl px-4">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={stagger}
-            className="text-center mb-14"
+            className="text-center mb-16"
           >
             <motion.h2
               variants={fadeUp}
               custom={0}
-              className="text-3xl sm:text-4xl font-bold text-white"
+              className="text-3xl sm:text-4xl font-bold text-stone-900"
             >
               6 มิติการประเมิน
             </motion.h2>
             <motion.p
               variants={fadeUp}
               custom={1}
-              className="mt-3 text-slate-400 max-w-xl mx-auto"
+              className="mt-4 text-stone-600 max-w-xl mx-auto font-light"
             >
               แบบประเมินครอบคลุม 6 มิติสำคัญที่สะท้อนศักยภาพรอบด้านของชุมชน
             </motion.p>
@@ -423,30 +391,30 @@ const Assessment = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
             variants={stagger}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
             {DIMENSIONS.map((dim, i) => {
               const Icon = dim.icon;
               return (
                 <motion.div key={dim.label} variants={fadeUp} custom={i}>
-                  <Card className="group relative h-full bg-slate-800/50 backdrop-blur-sm border-slate-700/40 p-6 transition-all duration-300 hover:border-emerald-500/30 hover:bg-slate-800/70 hover:shadow-lg">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                          <Icon className="h-5 w-5 text-emerald-400" />
+                  <Card className="group relative h-full bg-white rounded-none border border-stone-200 p-6 transition-all duration-300 hover:border-red-600 hover:shadow-md">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-stone-100 rounded-none group-hover:bg-red-50 transition-colors">
+                          <Icon className="h-5 w-5 text-stone-700 group-hover:text-red-600 transition-colors" />
                         </div>
-                        <h3 className="text-base font-semibold text-white leading-snug">
+                        <h3 className="text-base font-bold text-stone-900 leading-snug">
                           {dim.label}
                         </h3>
                       </div>
-                      <span className="shrink-0 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/20">
+                      <span className="shrink-0 bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600">
                         {dim.weight}%
                       </span>
                     </div>
                     {/* Subtle progress indicator */}
-                    <div className="mt-4 h-1.5 w-full rounded-full bg-slate-700/50 overflow-hidden">
+                    <div className="mt-6 h-1 w-full bg-stone-100 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500/60 to-teal-400/60 transition-all duration-700"
+                        className="h-full bg-red-600 transition-all duration-700"
                         style={{ width: `${dim.weight * 4}%` }}
                       />
                     </div>
@@ -461,11 +429,7 @@ const Assessment = () => {
       {/* ============================================================ */}
       {/*  BOTTOM CTA                                                   */}
       {/* ============================================================ */}
-      <section className="relative bg-gradient-to-br from-slate-900 to-emerald-950 py-20 lg:py-28">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-emerald-600/[0.06] blur-3xl" />
-        </div>
-
+      <section className="relative bg-white py-24 lg:py-32 border-t border-stone-200">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -476,15 +440,15 @@ const Assessment = () => {
           <motion.div
             variants={fadeUp}
             custom={0}
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15"
+            className="mx-auto mb-8 flex h-16 w-16 items-center justify-center bg-red-50"
           >
-            <Leaf className="h-8 w-8 text-emerald-400" />
+            <Leaf className="h-8 w-8 text-red-600" />
           </motion.div>
 
           <motion.h2
             variants={fadeUp}
             custom={1}
-            className="text-3xl sm:text-4xl font-bold text-white"
+            className="text-3xl sm:text-4xl font-bold text-stone-900"
           >
             พร้อมที่จะค้นพบศักยภาพชุมชนของคุณแล้วหรือยัง?
           </motion.h2>
@@ -492,20 +456,20 @@ const Assessment = () => {
           <motion.p
             variants={fadeUp}
             custom={2}
-            className="mt-4 text-lg text-slate-300 leading-relaxed"
+            className="mt-6 text-lg text-stone-600 leading-relaxed font-light"
           >
             เริ่มทำแบบประเมิน PCGA วันนี้
             เพื่อรับผลวิเคราะห์และแนวทางการพัฒนาชุมชนที่เหมาะสม
           </motion.p>
 
-          <motion.div variants={fadeUp} custom={3} className="mt-8">
+          <motion.div variants={fadeUp} custom={3} className="mt-10">
             <Button
               onClick={handleStart}
               size="lg"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-emerald-900/40 transition-all duration-200"
+              className="bg-red-600 hover:bg-red-700 text-white px-10 py-7 text-lg font-medium rounded-none transition-all duration-300 hover:shadow-[4px_4px_0px_0px_rgba(68,28,19,0.2)]"
             >
               เริ่มทำแบบประเมินเลย
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-3 h-5 w-5" />
             </Button>
           </motion.div>
         </motion.div>
@@ -517,33 +481,33 @@ const Assessment = () => {
       {/*  PRIVACY CONSENT MODAL                                        */}
       {/* ============================================================ */}
       <Dialog open={showPrivacyModal} onOpenChange={setShowPrivacyModal}>
-        <DialogContent className="sm:max-w-lg bg-slate-900 border-slate-700/60 text-white">
+        <DialogContent className="sm:max-w-lg bg-white border border-stone-200 rounded-none shadow-xl">
           <DialogHeader>
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/15">
-              <Shield className="h-6 w-6 text-emerald-400" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-red-50 rounded-none">
+              <Shield className="h-7 w-7 text-red-600" />
             </div>
-            <DialogTitle className="text-center text-xl font-bold text-white">
+            <DialogTitle className="text-center text-xl font-bold text-stone-900">
               ข้อตกลงและความเป็นส่วนตัว
             </DialogTitle>
-            <DialogDescription className="mt-4 text-sm leading-relaxed text-slate-300 text-center">
+            <DialogDescription className="mt-4 text-sm leading-relaxed text-stone-600 text-center font-light">
               แบบสอบถามนี้จัดทำขึ้นเพื่อประเมินศักยภาพและความพร้อมของชุมชน
               ข้อมูลที่ท่านให้จะถูกเก็บรักษาเป็นความลับและนำไปใช้เพื่อการวิเคราะห์และออกแบบแนวทางการพัฒนาที่เหมาะสมกับชุมชนของท่านเท่านั้น
               ข้อมูลจะไม่ถูกเปิดเผยต่อบุคคลภายนอกโดยไม่ได้รับความยินยอม
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <DialogFooter className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
               onClick={handleDecline}
-              className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+              className="border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900 rounded-none"
             >
               ปฏิเสธ
             </Button>
             <Button
               onClick={handleAccept}
               disabled={!isAcceptEnabled || isLoading}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-600 hover:bg-red-700 text-white font-medium rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading
                 ? "กำลังโหลด..."
