@@ -189,7 +189,7 @@ const Assessment = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 font-sans">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 font-prompt">
         <Navbar />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -227,7 +227,7 @@ const Assessment = () => {
   /* ---------------------------------------------------------------- */
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans selection:bg-red-100 selection:text-red-900">
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-prompt selection:bg-red-100 selection:text-red-900 leading-relaxed">
       <Navbar />
 
       {/* ============================================================ */}

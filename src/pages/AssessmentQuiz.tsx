@@ -376,10 +376,10 @@ export default function AssessmentQuiz() {
                 {question.question_number}
               </span>
             )}
-            <p className="text-sm font-medium leading-relaxed text-black sm:text-base">
+            <p className="text-base font-semibold leading-relaxed tracking-tight text-black sm:text-lg">
               {question.question_text}
               {optional && (
-                <span className="ml-1 text-xs text-stone-400">(ไม่บังคับ)</span>
+                <span className="ml-2 text-xs font-normal text-stone-400 tracking-normal">(ไม่บังคับ)</span>
               )}
             </p>
           </div>
@@ -428,7 +428,7 @@ export default function AssessmentQuiz() {
                         updateAnswer(question.id, { selected_options: next });
                       }}
                     />
-                    <span className="text-sm text-black">{opt.option_text}</span>
+                    <span className="text-sm text-black font-normal leading-relaxed">{opt.option_text}</span>
                   </label>
                 );
               })}
@@ -460,7 +460,7 @@ export default function AssessmentQuiz() {
                       id={opt.id} 
                       className="text-red-700 data-[state=checked]:border-red-700"
                     />
-                    <Label htmlFor={opt.id} className="cursor-pointer text-sm text-black">
+                    <Label htmlFor={opt.id} className="cursor-pointer text-sm text-black font-normal leading-relaxed">
                       {opt.option_text}
                     </Label>
                   </label>
@@ -528,7 +528,7 @@ export default function AssessmentQuiz() {
   // Not logged in
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+      <div className="flex min-h-screen flex-col bg-[#FAFAFA] font-prompt">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
           <h2 className="text-xl font-semibold text-black">กรุณาเข้าสู่ระบบ</h2>
@@ -545,7 +545,7 @@ export default function AssessmentQuiz() {
   // Loading form
   if (loadingForm) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+      <div className="flex min-h-screen flex-col bg-[#FAFAFA] font-prompt">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-red-700" />
@@ -559,7 +559,7 @@ export default function AssessmentQuiz() {
   // No form found
   if (!form || totalSections === 0) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+      <div className="flex min-h-screen flex-col bg-[#FAFAFA] font-prompt">
         <Navbar />
         <main className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
           <h2 className="text-xl font-semibold text-black">ไม่พบแบบประเมิน</h2>
@@ -574,16 +574,16 @@ export default function AssessmentQuiz() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+    <div className="flex min-h-screen flex-col bg-[#FAFAFA] font-prompt">
       <Navbar />
 
       <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           {/* ── Form title ──────────────────────────────────── */}
           <div className="mb-6 text-center">
-            <h1 className="text-xl font-bold text-black sm:text-2xl">{form.title}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl">{form.title}</h1>
             {form.instructions && (
-              <p className="mt-2 text-sm text-stone-500">{form.instructions}</p>
+              <p className="mt-2 text-base leading-relaxed text-stone-500">{form.instructions}</p>
             )}
           </div>
 
@@ -613,7 +613,7 @@ export default function AssessmentQuiz() {
                 {/* Section header */}
                 <div className="mb-6 rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-lg font-semibold text-black">
+                    <h2 className="text-xl font-bold tracking-tight text-black">
                       {currentSection.title}
                     </h2>
                     {currentSection.weight_percent > 0 && (
