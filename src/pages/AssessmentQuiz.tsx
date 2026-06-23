@@ -349,6 +349,20 @@ export default function AssessmentQuiz() {
       const ans = answers[question.id] ?? {};
       const optional = isOptionalQuestion(question, allQuestions);
 
+      const handleAutoScroll = () => {
+        const currentIndex = allQuestions.findIndex(q => q.id === question.id);
+        if (currentIndex >= 0 && currentIndex < allQuestions.length - 1) {
+          const nextId = allQuestions[currentIndex + 1].id;
+          setTimeout(() => {
+            const el = document.getElementById(`question-${nextId}`);
+            if (el) {
+              const y = el.getBoundingClientRect().top + window.scrollY - 100; // 100px offset for header
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+          }, 150);
+        }
+      };
+
       return (
         <div key={question.id} className="space-y-3">
           {/* Question header */}
@@ -420,9 +434,10 @@ export default function AssessmentQuiz() {
           {question.question_type === 'single_select' && (
             <RadioGroup
               value={ans.selected_options?.[0] ?? ''}
-              onValueChange={(val) =>
-                updateAnswer(question.id, { selected_options: [val] })
-              }
+              onValueChange={(val) => {
+                updateAnswer(question.id, { selected_options: [val] });
+                handleAutoScroll();
+              }}
               className="grid gap-2 sm:grid-cols-2"
             >
               {question.assessment_options.map((opt) => {
@@ -458,7 +473,10 @@ export default function AssessmentQuiz() {
                   <button
                     key={val}
                     type="button"
-                    onClick={() => updateAnswer(question.id, { scale_value: val })}
+                    onClick={() => {
+                      updateAnswer(question.id, { scale_value: val });
+                      handleAutoScroll();
+                    }}
                     className="group flex flex-col items-center gap-1.5"
                   >
                     <div
@@ -612,6 +630,7 @@ export default function AssessmentQuiz() {
                   {currentSection.assessment_questions.map((q) => (
                     <div
                       key={q.id}
+                      id={`question-${q.id}`}
                       className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm"
                     >
                       {renderQuestion(q, currentSection.assessment_questions)}

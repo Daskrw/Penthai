@@ -32,6 +32,7 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import heroBg from "@/assets/hero-banner-v2.png";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -232,8 +233,12 @@ const Assessment = () => {
       {/* ============================================================ */}
       {/*  HERO                                                         */}
       {/* ============================================================ */}
-      <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
-        <div className="relative mx-auto max-w-5xl px-4 text-center">
+      <section 
+        className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      >
+        <div className="absolute inset-0 bg-stone-50/85 backdrop-blur-[2px]" />
+        <div className="relative mx-auto max-w-5xl px-4 text-center z-10">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -328,9 +333,8 @@ const Assessment = () => {
                     className={`group relative h-full bg-stone-50 rounded-none border ${tier.border} p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-md`}
                   >
                     {/* Icon */}
-                    <div className="mb-6 flex items-center gap-4">
+                    <div className="mb-6 flex items-center">
                       <span className="text-4xl">{tier.emoji}</span>
-                      <Icon className={`h-6 w-6 ${tier.iconColor}`} />
                     </div>
 
                     {/* Title & Range */}
@@ -448,7 +452,7 @@ const Assessment = () => {
           <motion.h2
             variants={fadeUp}
             custom={1}
-            className="text-3xl sm:text-4xl font-bold text-stone-900"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900 whitespace-nowrap tracking-tight"
           >
             พร้อมที่จะค้นพบศักยภาพชุมชนของคุณแล้วหรือยัง?
           </motion.h2>
