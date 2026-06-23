@@ -411,7 +411,7 @@ export default function AssessmentQuiz() {
                 return (
                   <label
                     key={opt.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors ${
                       selected
                         ? 'border-red-700 bg-red-50/50'
                         : 'border-stone-200 hover:border-stone-300'
@@ -449,7 +449,7 @@ export default function AssessmentQuiz() {
                 return (
                   <label
                     key={opt.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors ${
                       selected
                         ? 'border-red-700 bg-red-50/50'
                         : 'border-stone-200 hover:border-stone-300'
@@ -470,7 +470,7 @@ export default function AssessmentQuiz() {
           )}
 
           {question.question_type === 'scale' && (
-            <div className="flex flex-wrap items-end justify-center gap-3 py-2 sm:gap-5">
+            <div className="flex flex-wrap items-end justify-center gap-2 sm:gap-4 py-2">
               {[1, 2, 3, 4, 5].map((val) => {
                 const isSelected = ans.scale_value === val;
                 return (
@@ -484,7 +484,7 @@ export default function AssessmentQuiz() {
                     className="group flex flex-col items-center gap-1.5"
                   >
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold transition-all sm:h-12 sm:w-12 ${
+                      className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-bold transition-all sm:h-14 sm:w-14 ${
                         SCALE_COLORS[val]
                       } ${
                         isSelected
@@ -651,7 +651,7 @@ export default function AssessmentQuiz() {
               variant="outline"
               onClick={goBack}
               disabled={currentSectionIndex === 0}
-              className="gap-1 border-stone-200 text-black hover:bg-stone-50"
+              className="gap-1 border-stone-200 text-black hover:bg-stone-50 h-12 sm:h-10 px-5"
             >
               <ChevronLeft className="h-4 w-4" />
               ย้อนกลับ
@@ -661,7 +661,7 @@ export default function AssessmentQuiz() {
               <Button
                 onClick={handleSubmit}
                 disabled={!isSectionValid() || submitting}
-                className="gap-1 bg-red-700 hover:bg-red-800 text-white"
+                className="gap-1 bg-red-700 hover:bg-red-800 text-white h-12 sm:h-10 px-6"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -674,7 +674,7 @@ export default function AssessmentQuiz() {
               <Button
                 onClick={goNext}
                 disabled={!isSectionValid()}
-                className="gap-1 bg-red-700 hover:bg-red-800 text-white"
+                className="gap-1 bg-red-700 hover:bg-red-800 text-white h-12 sm:h-10 px-6"
               >
                 ถัดไป
                 <ChevronRight className="h-4 w-4" />

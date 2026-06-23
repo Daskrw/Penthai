@@ -263,7 +263,7 @@ const Assessment = () => {
             <motion.p
               variants={fadeUp}
               custom={2}
-              className="mt-4 text-lg sm:text-xl font-medium text-red-600 tracking-wide"
+              className="mt-4 text-base sm:text-xl font-medium text-red-600 tracking-wide"
             >
               Penthai Community Growth Assessment
             </motion.p>
@@ -452,7 +452,7 @@ const Assessment = () => {
           <motion.h2
             variants={fadeUp}
             custom={1}
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-900 whitespace-nowrap tracking-tight"
+            className="text-xl sm:text-3xl md:text-4xl font-bold text-stone-900 sm:whitespace-nowrap tracking-tight"
           >
             พร้อมที่จะค้นพบศักยภาพชุมชนของคุณแล้วหรือยัง?
           </motion.h2>
@@ -485,22 +485,24 @@ const Assessment = () => {
       {/*  PRIVACY CONSENT MODAL                                        */}
       {/* ============================================================ */}
       <Dialog open={showPrivacyModal} onOpenChange={setShowPrivacyModal}>
-        <DialogContent className="sm:max-w-lg bg-white border border-stone-200 rounded-none shadow-xl">
-          <DialogHeader>
+        <DialogContent className="w-[90vw] max-w-md max-h-[80vh] flex flex-col bg-white border border-stone-200 rounded-none shadow-xl p-6">
+          <DialogHeader className="shrink-0">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-red-50 rounded-none">
               <Shield className="h-7 w-7 text-red-600" />
             </div>
             <DialogTitle className="text-center text-xl font-bold text-stone-900">
               ข้อตกลงและความเป็นส่วนตัว
             </DialogTitle>
-            <DialogDescription className="mt-4 text-sm leading-relaxed text-stone-600 text-center font-light">
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto py-4">
+            <DialogDescription className="text-sm leading-relaxed text-stone-600 text-center font-light">
               แบบสอบถามนี้จัดทำขึ้นเพื่อประเมินศักยภาพและความพร้อมของชุมชน
               ข้อมูลที่ท่านให้จะถูกเก็บรักษาเป็นความลับและนำไปใช้เพื่อการวิเคราะห์และออกแบบแนวทางการพัฒนาที่เหมาะสมกับชุมชนของท่านเท่านั้น
               ข้อมูลจะไม่ถูกเปิดเผยต่อบุคคลภายนอกโดยไม่ได้รับความยินยอม
             </DialogDescription>
-          </DialogHeader>
+          </div>
 
-          <DialogFooter className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <DialogFooter className="shrink-0 mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
               onClick={handleDecline}

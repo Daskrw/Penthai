@@ -175,6 +175,7 @@ const Auth = () => {
                           value={signInEmail}
                           onChange={(e) => setSignInEmail(e.target.value)}
                           required
+                          className="h-12 md:h-10 text-base"
                         />
                       </div>
                       <div className="space-y-2">
@@ -187,7 +188,7 @@ const Auth = () => {
                             value={signInPassword}
                             onChange={(e) => setSignInPassword(e.target.value)}
                             required
-                            className="pr-10"
+                            className="h-12 md:h-10 text-base pr-10"
                           />
                           <button
                             type="button"
@@ -198,7 +199,7 @@ const Auth = () => {
                           </button>
                         </div>
                       </div>
-                      <Button type="submit" className="w-full" disabled={loading}>
+                      <Button type="submit" className="w-full h-12 md:h-10 text-base" disabled={loading}>
                         {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
                       </Button>
                     </form>
@@ -225,6 +226,7 @@ const Auth = () => {
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           required
+                          className="h-12 md:h-10 text-base"
                         />
                       </div>
                       <div className="space-y-2">
@@ -236,6 +238,7 @@ const Auth = () => {
                           value={signUpEmail}
                           onChange={(e) => setSignUpEmail(e.target.value)}
                           required
+                          className="h-12 md:h-10 text-base"
                         />
                       </div>
                       <div className="space-y-2">
@@ -249,7 +252,7 @@ const Auth = () => {
                             onChange={(e) => setSignUpPassword(e.target.value)}
                             required
                             minLength={6}
-                            className="pr-10"
+                            className="h-12 md:h-10 text-base pr-10"
                           />
                           <button
                             type="button"
@@ -271,7 +274,7 @@ const Auth = () => {
                             onChange={(e) => setSignUpConfirmPassword(e.target.value)}
                             required
                             minLength={6}
-                            className="pr-10"
+                            className="h-12 md:h-10 text-base pr-10"
                           />
                           <button
                             type="button"
@@ -282,7 +285,7 @@ const Auth = () => {
                           </button>
                         </div>
                       </div>
-                      <Button type="submit" className="w-full" disabled={loading}>
+                      <Button type="submit" className="w-full h-12 md:h-10 text-base" disabled={loading}>
                         {loading ? "กำลังสร้างบัญชี..." : "ลงทะเบียน"}
                       </Button>
                     </form>

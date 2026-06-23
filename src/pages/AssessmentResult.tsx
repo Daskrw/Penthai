@@ -387,7 +387,7 @@ const AssessmentResult = () => {
                     <h3 className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: THEME.brown }}>ระดับชุมชน</h3>
                     <h2 className="text-3xl font-extrabold mb-3" style={{ color: THEME.red }}>{levelData.thaiName}</h2>
                     <p className="text-sm font-medium mb-6 px-4" style={{ color: THEME.textMuted }}>{levelData.description}</p>
-                    <div className="w-full max-w-[250px] mx-auto mt-auto pt-4 border-t" style={{ borderColor: THEME.brownLight }}>
+                    <div className="w-full max-w-[280px] sm:max-w-[320px] mx-auto mt-auto pt-4 border-t" style={{ borderColor: THEME.brownLight }}>
                       <RadarChart dimensions={dimensions} fillColor={THEME.red} strokeColor={THEME.brown} />
                     </div>
                   </div>
@@ -409,8 +409,8 @@ const AssessmentResult = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto w-full">
+                    <table className="w-full text-left border-collapse min-w-[600px]">
                       <thead>
                         <tr className="border-b bg-white text-sm" style={{ borderColor: THEME.brownLight, color: THEME.textMuted }}>
                           <th className="p-4 font-semibold">มิติการประเมิน</th>
