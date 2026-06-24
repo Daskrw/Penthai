@@ -494,12 +494,10 @@ export default function AssessmentQuiz() {
                       className="group flex flex-col items-center flex-1 focus:outline-none"
                     >
                       <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-bold transition-all sm:h-14 sm:w-14 shrink-0 ${
-                          SCALE_COLORS[val]
-                        } ${
+                        className={`flex h-12 w-12 items-center justify-center rounded-full text-base font-bold transition-all sm:h-14 sm:w-14 shrink-0 border-[3px] ${
                           isSelected
-                            ? `ring-4 ${SCALE_RING_COLORS[val]} scale-110 shadow-md`
-                            : 'opacity-80 hover:opacity-100 hover:scale-105 border-[3px] border-white shadow-sm'
+                            ? `${SCALE_COLORS[val]} ring-4 ${SCALE_RING_COLORS[val]} scale-110 shadow-md border-white`
+                            : 'bg-white text-stone-500 border-stone-200 hover:border-stone-400 hover:text-stone-700 hover:scale-105 shadow-sm'
                         }`}
                       >
                         {val}
