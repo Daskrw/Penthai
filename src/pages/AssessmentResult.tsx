@@ -60,23 +60,24 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
   const maxRadius = size / 2 - 40;
   const angleStep = (2 * Math.PI) / dimensions.length;
 
+  const maxAxisValue = Math.max(...dimensions.map(d => d.weight), 10);
+
   const getPoint = (index: number, value: number) => {
     const angle = angleStep * index - Math.PI / 2;
-    const radius = (value / 100) * maxRadius;
+    const radius = (value / maxAxisValue) * maxRadius;
     return {
       x: center + radius * Math.cos(angle),
       y: center + radius * Math.sin(angle),
     };
   };
 
-  const gridLevels = [20, 40, 60, 80, 100];
+  const gridLevels = [0.2, 0.4, 0.6, 0.8, 1.0].map(pct => pct * maxAxisValue);
 
-  const dataPoints = dimensions.map((d, i) => {
-    const normalizedPercent = d.maxRawScore > 0 ? (d.rawScore / d.maxRawScore) * 100 : 0;
-    return getPoint(i, normalizedPercent);
-  });
-  const dataPath =
-    dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ') + 'Z';
+  const maxWeightPoints = dimensions.map((d, i) => getPoint(i, d.weight));
+  const maxWeightPath = maxWeightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ') + 'Z';
+
+  const dataPoints = dimensions.map((d, i) => getPoint(i, d.weightedScore));
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ') + 'Z';
 
   return (
     <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full max-w-[400px] mx-auto aspect-square overflow-visible">
@@ -97,7 +98,7 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
       })}
 
       {dimensions.map((_, i) => {
-        const end = getPoint(i, 100);
+        const end = getPoint(i, maxAxisValue);
         return (
           <line
             key={`axis-${i}`}
@@ -111,6 +112,15 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
           />
         );
       })}
+
+      <path
+        d={maxWeightPath}
+        fill={strokeColor}
+        fillOpacity={0.05}
+        stroke={strokeColor}
+        strokeWidth={1}
+        strokeDasharray="4 4"
+      />
 
       <motion.path
         d={dataPath}
@@ -140,7 +150,7 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
       ))}
 
       {dimensions.map((d, i) => {
-        const labelPoint = getPoint(i, 125);
+        const labelPoint = getPoint(i, maxAxisValue * 1.25);
         return (
           <text
             key={`label-${i}`}
