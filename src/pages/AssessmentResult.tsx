@@ -18,6 +18,7 @@ import {
 import imgLevel1 from '@/assets/01.jpg';
 import imgLevel2 from '@/assets/02.jpg';
 import imgLevel3 from '@/assets/03.jpg';
+import heroBg from '@/assets/hero-result-bg.jpg';
 
 const LEVEL_IMAGES: Record<ResultLevel, string> = {
   seed: imgLevel1,
@@ -355,9 +356,21 @@ const AssessmentResult = () => {
         {/* 1. TOP SECTION: Hero Result (Full Width) */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          className="w-full bg-white border-b border-stone-200 py-12 md:py-20 px-4"
+          className="w-full relative border-b border-stone-200 py-12 md:py-20 px-4 overflow-hidden"
         >
-          <div className="container mx-auto max-w-6xl">
+          {/* Background Image with Overlay */}
+          <div 
+            className="absolute inset-0 z-0" 
+            style={{ 
+              backgroundImage: `url(${heroBg})`, 
+              backgroundSize: 'cover', 
+              backgroundPosition: 'center',
+            }}
+          >
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
+          </div>
+
+          <div className="container mx-auto max-w-6xl relative z-10">
             {hasNoData ? (
               <div className="text-center py-8">
                 <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-700" />
