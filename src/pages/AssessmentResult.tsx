@@ -434,7 +434,7 @@ const AssessmentResult = () => {
               className="bg-white rounded-[2rem] shadow-sm border border-stone-200 p-8 md:p-12 text-center"
             >
               <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-8">วิเคราะห์ศักยภาพรายมิติ</h2>
-              <div className="w-full max-w-3xl mx-auto aspect-square flex items-center justify-center">
+              <div className="w-full max-w-[400px] mx-auto flex items-center justify-center">
                 <RadarChart dimensions={dimensions} fillColor={THEME.red} strokeColor={THEME.brown} />
               </div>
             </motion.div>
