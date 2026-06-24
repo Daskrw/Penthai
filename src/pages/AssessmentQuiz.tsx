@@ -534,22 +534,6 @@ export default function AssessmentQuiz() {
     );
   }
 
-  // Not logged in
-  if (!user) {
-    return (
-      <div className="flex min-h-screen flex-col bg-[#FAFAFA] font-prompt">
-        <Navbar />
-        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
-          <h2 className="text-xl font-semibold text-black">กรุณาเข้าสู่ระบบ</h2>
-          <p className="text-stone-500">คุณต้องเข้าสู่ระบบก่อนทำแบบประเมิน</p>
-          <Button onClick={() => navigate('/login')} className="mt-2 bg-red-700 hover:bg-red-800 text-white">
-            เข้าสู่ระบบ
-          </Button>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   // Loading form
   if (loadingForm) {

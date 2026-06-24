@@ -306,22 +306,6 @@ const AssessmentResult = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <>
-        <Navbar />
-        <main className="min-h-[80vh] flex items-center justify-center px-4 font-prompt bg-stone-50">
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold text-stone-900">กรุณาเข้าสู่ระบบ</h2>
-            <Button onClick={() => navigate('/auth')} className="bg-red-700 hover:bg-red-800 text-white">
-              เข้าสู่ระบบ
-            </Button>
-          </div>
-        </main>
-        <Footer />
-      </>
-    );
-  }
 
   if (error || !response) {
     return (
