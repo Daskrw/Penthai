@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { RefreshCw, Home, Loader2, AlertCircle, BarChart3, Info } from 'lucide-react';
+import { RefreshCw, Home, Loader2, AlertCircle, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -14,6 +13,17 @@ import {
   type ResultLevel,
   type DimensionScore,
 } from '@/types/assessment';
+
+// --- Level Images ---
+import imgLevel1 from '@/assets/01.jpg';
+import imgLevel2 from '@/assets/02.jpg';
+import imgLevel3 from '@/assets/03.jpg';
+
+const LEVEL_IMAGES: Record<ResultLevel, string> = {
+  seed: imgLevel1,
+  sapling: imgLevel2,
+  big_tree: imgLevel3,
+};
 
 // ─── Theme Colors ────────────────────────────────────────────────────────────
 const THEME = {
@@ -69,7 +79,7 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
     dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ') + 'Z';
 
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[320px] mx-auto">
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full max-w-[400px] mx-auto aspect-square overflow-visible">
       {gridLevels.map((level) => {
         const pts = dimensions.map((_, i) => getPoint(i, level));
         const path =
@@ -130,7 +140,7 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
       ))}
 
       {dimensions.map((d, i) => {
-        const labelPoint = getPoint(i, 120);
+        const labelPoint = getPoint(i, 125);
         return (
           <text
             key={`label-${i}`}
@@ -139,7 +149,7 @@ const RadarChart = ({ dimensions, fillColor, strokeColor }: RadarChartProps) => 
             textAnchor="middle"
             dominantBaseline="central"
             style={{ fill: THEME.text }}
-            className="text-[11px] font-bold"
+            className="text-[10px] md:text-xs font-bold"
           >
             {d.shortTitle}
           </text>
@@ -164,6 +174,7 @@ const AssessmentResult = () => {
     | null
   >(null);
   const [dimensions, setDimensions] = useState<DimensionScore[]>([]);
+  const [communityName, setCommunityName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -196,9 +207,10 @@ const AssessmentResult = () => {
 
         if (sectionsError) throw sectionsError;
 
+        // Fetch answers with question sort order so we can find the very first short_text question (Community Name)
         const { data: answersData, error: answersError } = await supabase
           .from('assessment_answers')
-          .select('*')
+          .select('*, assessment_questions(sort_order)')
           .eq('response_id', responseId);
 
         if (answersError) throw answersError;
@@ -208,6 +220,19 @@ const AssessmentResult = () => {
           if (a.scale_value != null) {
             answerMap.set(a.question_id, a.scale_value);
           }
+        }
+
+        // Find community name
+        const textAnswers = (answersData || []).filter((a: any) => a.text_answer && a.text_answer.trim() !== '');
+        if (textAnswers.length > 0) {
+          textAnswers.sort((a: any, b: any) => {
+            const orderA = a.assessment_questions?.sort_order || 0;
+            const orderB = b.assessment_questions?.sort_order || 0;
+            return orderA - orderB;
+          });
+          setCommunityName(textAnswers[0].text_answer);
+        } else {
+          setCommunityName('ผลการประเมินชุมชน');
         }
 
         const dims: DimensionScore[] = [];
@@ -261,9 +286,9 @@ const AssessmentResult = () => {
     return (
       <>
         <Navbar />
-        <main className="min-h-[80vh] flex flex-col items-center justify-center" style={{ backgroundColor: THEME.bg }}>
-          <Loader2 className="h-12 w-12 animate-spin mb-4" style={{ color: THEME.red }} />
-          <p className="text-lg" style={{ color: THEME.textMuted }}>กำลังประมวลผล...</p>
+        <main className="min-h-[80vh] flex flex-col items-center justify-center font-prompt bg-stone-50">
+          <Loader2 className="h-12 w-12 animate-spin mb-4 text-red-700" />
+          <p className="text-lg text-stone-500">กำลังประมวลผล...</p>
         </main>
         <Footer />
       </>
@@ -274,10 +299,10 @@ const AssessmentResult = () => {
     return (
       <>
         <Navbar />
-        <main className="min-h-[80vh] flex items-center justify-center px-4" style={{ backgroundColor: THEME.bg }}>
+        <main className="min-h-[80vh] flex items-center justify-center px-4 font-prompt bg-stone-50">
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold" style={{ color: THEME.text }}>กรุณาเข้าสู่ระบบ</h2>
-            <Button onClick={() => navigate('/auth')} style={{ backgroundColor: THEME.red, color: 'white' }}>
+            <h2 className="text-2xl font-bold text-stone-900">กรุณาเข้าสู่ระบบ</h2>
+            <Button onClick={() => navigate('/auth')} className="bg-red-700 hover:bg-red-800 text-white">
               เข้าสู่ระบบ
             </Button>
           </div>
@@ -291,12 +316,12 @@ const AssessmentResult = () => {
     return (
       <>
         <Navbar />
-        <main className="min-h-[80vh] flex items-center justify-center px-4" style={{ backgroundColor: THEME.bg }}>
+        <main className="min-h-[80vh] flex items-center justify-center px-4 font-prompt bg-stone-50">
           <div className="text-center space-y-4 max-w-md">
-            <AlertCircle className="h-16 w-16 mx-auto" style={{ color: THEME.red }} />
-            <h2 className="text-2xl font-bold" style={{ color: THEME.text }}>เกิดข้อผิดพลาด</h2>
-            <p style={{ color: THEME.textMuted }}>{error}</p>
-            <Button onClick={() => navigate('/assessment')} style={{ backgroundColor: THEME.red, color: 'white' }}>
+            <AlertCircle className="h-16 w-16 mx-auto text-red-700" />
+            <h2 className="text-2xl font-bold text-stone-900">เกิดข้อผิดพลาด</h2>
+            <p className="text-stone-500">{error}</p>
+            <Button onClick={() => navigate('/assessment')} className="bg-red-700 hover:bg-red-800 text-white">
               กลับไปหน้าประเมิน
             </Button>
           </div>
@@ -306,193 +331,111 @@ const AssessmentResult = () => {
     );
   }
 
-  // ─── If Data is Missing (Old Response Error) ─────────────────────────
   const hasNoData = dimensions.length === 0 || dimensions.every(d => d.rawScore === 0);
 
   const levelKey: ResultLevel = response.result_level || 'seed';
   const levelData = RESULT_LEVELS[levelKey];
-  const percent = hasNoData ? 0 : response.score_percent ?? 0;
-  
-  const circleRadius = 80;
-  const circumference = 2 * Math.PI * circleRadius;
-  const targetDash = (percent / 100) * circumference;
+  const levelImage = LEVEL_IMAGES[levelKey];
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen pb-20" style={{ backgroundColor: THEME.bg }}>
+      <main className="min-h-screen font-prompt bg-[#FAFAFA] pb-20">
         
-        {/* ──────── 1. Header ──────── */}
-        <div className="pt-20 pb-32 px-4 border-b border-opacity-20" style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brown }}>
-          <div className="container mx-auto max-w-4xl text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight" style={{ color: THEME.text }}>
-                ผลการประเมิน PCGA
-              </h1>
-              <p className="text-lg md:text-xl font-medium" style={{ color: THEME.textMuted }}>
-                {response.assessment_forms?.title}
-              </p>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* ──────── 2. Main Result Card ──────── */}
-        <div className="container mx-auto max-w-4xl px-4 -mt-24 relative z-10">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
-            <Card className="rounded-3xl shadow-xl border overflow-hidden" style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brownLight }}>
-              {hasNoData ? (
-                <CardContent className="p-12 text-center">
-                  <AlertCircle className="w-16 h-16 mx-auto mb-4" style={{ color: THEME.red }} />
-                  <h2 className="text-2xl font-bold mb-2" style={{ color: THEME.text }}>ข้อมูลการประเมินไม่สมบูรณ์</h2>
-                  <p className="mb-8" style={{ color: THEME.textMuted }}>
-                    ระบบได้รับการอัปเดตแบบสอบถามใหม่ ทำให้ข้อมูลผลการประเมินเดิมไม่สามารถแสดงผลได้ กรุณาทำแบบประเมินใหม่อีกครั้ง
-                  </p>
-                  <Button onClick={() => navigate('/assessment')} size="lg" style={{ backgroundColor: THEME.red, color: 'white' }}>
-                    <RefreshCw className="w-4 h-4 mr-2" /> ทำแบบประเมินใหม่
-                  </Button>
-                </CardContent>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x" style={{ borderColor: THEME.brownLight }}>
-                  
-                  {/* Left: Overall Score */}
-                  <div className="p-8 md:p-12 flex flex-col items-center justify-center text-center">
-                    <h2 className="text-xl font-bold mb-6" style={{ color: THEME.text }}>คะแนนรวมของคุณ</h2>
-                    <div className="relative w-48 h-48 mb-6">
-                      <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
-                        <circle cx="100" cy="100" r={circleRadius} fill="transparent" stroke={THEME.brownLight} strokeWidth={12} />
-                        <motion.circle
-                          cx="100" cy="100" r={circleRadius} fill="transparent"
-                          stroke={THEME.red} strokeWidth={12} strokeLinecap="round"
-                          initial={{ strokeDasharray: `0 ${circumference}` }}
-                          animate={{ strokeDasharray: `${targetDash} ${circumference}` }}
-                          transition={{ duration: 2, ease: 'easeOut', delay: 0.5 }}
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.span className="text-5xl font-extrabold" style={{ color: THEME.text }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
-                          {Math.round(percent)}
-                        </motion.span>
-                        <span className="text-sm font-semibold mt-1" style={{ color: THEME.textMuted }}>
-                          / 100
-                        </span>
-                      </div>
-                    </div>
+        <div className="container mx-auto max-w-5xl px-4 py-8 md:py-16 space-y-8">
+          
+          {/* 1. TOP SECTION: Hero Result */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+            className="bg-white rounded-[2rem] shadow-sm border border-stone-200 p-8 md:p-12 overflow-hidden"
+          >
+            {hasNoData ? (
+              <div className="text-center py-8">
+                <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-700" />
+                <h2 className="text-2xl font-bold mb-2 text-stone-900">ข้อมูลการประเมินไม่สมบูรณ์</h2>
+                <p className="mb-8 text-stone-500">
+                  ระบบได้รับการอัปเดตแบบสอบถามใหม่ ทำให้ข้อมูลผลการประเมินเดิมไม่สามารถแสดงผลได้ กรุณาทำแบบประเมินใหม่อีกครั้ง
+                </p>
+                <Button onClick={() => navigate('/assessment')} size="lg" className="bg-red-700 hover:bg-red-800 text-white">
+                  <RefreshCw className="w-4 h-4 mr-2" /> ทำแบบประเมินใหม่
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {/* Left: Text */}
+                <div className="text-center md:text-left space-y-6">
+                  <h1 className="text-3xl md:text-5xl font-extrabold text-stone-900 leading-tight">
+                    {communityName}
+                  </h1>
+                  <div className="inline-block px-6 py-2 rounded-full bg-red-50 border border-red-100">
+                    <p className="text-2xl md:text-3xl font-bold text-red-700">
+                      {levelData.thaiName}
+                    </p>
                   </div>
-
-                  {/* Right: Level & Radar */}
-                  <div className="p-8 md:p-12 flex flex-col items-center justify-center text-center bg-stone-50/50">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full text-4xl mb-4 bg-white shadow-sm border" style={{ borderColor: THEME.brownLight }}>
-                      {levelData.icon}
-                    </div>
-                    <h3 className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: THEME.brown }}>ระดับชุมชน</h3>
-                    <h2 className="text-3xl font-extrabold mb-3" style={{ color: THEME.red }}>{levelData.thaiName}</h2>
-                    <p className="text-sm font-medium mb-6 px-4" style={{ color: THEME.textMuted }}>{levelData.description}</p>
-                    <div className="w-full max-w-[280px] sm:max-w-[320px] mx-auto mt-auto pt-4 border-t" style={{ borderColor: THEME.brownLight }}>
-                      <RadarChart dimensions={dimensions} fillColor={THEME.red} strokeColor={THEME.brown} />
-                    </div>
+                  <div className="flex flex-col gap-2 pt-4">
+                    <p className="text-stone-500 text-sm md:text-base font-medium">คะแนนรวม (Total Score)</p>
+                    <p className="text-4xl font-black text-stone-900">{Math.round(response.score_percent ?? 0)} <span className="text-lg text-stone-400 font-medium">/ 100</span></p>
                   </div>
                 </div>
-              )}
-            </Card>
+
+                {/* Right: Image */}
+                <div className="flex justify-center md:justify-end">
+                  <img 
+                    src={levelImage} 
+                    alt={levelData.thaiName} 
+                    className="w-full max-w-[320px] md:max-w-[400px] rounded-[2rem] shadow-md object-cover aspect-square" 
+                  />
+                </div>
+              </div>
+            )}
           </motion.div>
-        </div>
 
-        {/* ──────── 3. Data Visualization Table ──────── */}
-        {!hasNoData && dimensions.length > 0 && (
-          <div className="container mx-auto max-w-4xl px-4 mt-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-              <Card className="rounded-2xl shadow-md border overflow-hidden" style={{ backgroundColor: THEME.cardBg, borderColor: THEME.brownLight }}>
-                <CardHeader className="bg-stone-50 border-b" style={{ borderColor: THEME.brownLight }}>
-                  <CardTitle className="flex items-center gap-2 text-xl" style={{ color: THEME.text }}>
-                    <BarChart3 className="w-5 h-5" style={{ color: THEME.brown }} /> 
-                    ตารางวิเคราะห์รายมิติ
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto w-full">
-                    <table className="w-full text-left border-collapse min-w-[600px]">
-                      <thead>
-                        <tr className="border-b bg-white text-sm" style={{ borderColor: THEME.brownLight, color: THEME.textMuted }}>
-                          <th className="p-4 font-semibold">มิติการประเมิน</th>
-                          <th className="p-4 font-semibold text-center">คะแนนดิบ</th>
-                          <th className="p-4 font-semibold text-center">สัดส่วนน้ำหนัก</th>
-                          <th className="p-4 font-semibold text-right">คะแนนสุทธิ</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y" style={{ borderColor: THEME.brownLight }}>
-                        {dimensions.map((dim, i) => {
-                          const pct = dim.maxRawScore > 0 ? Math.round((dim.rawScore / dim.maxRawScore) * 100) : 0;
-                          return (
-                            <motion.tr 
-                              key={dim.sectionId}
-                              initial={{ opacity: 0, backgroundColor: 'rgba(255,255,255,0)' }} 
-                              animate={{ opacity: 1, backgroundColor: 'rgba(255,255,255,1)' }} 
-                              transition={{ delay: 0.8 + i * 0.1 }}
-                              className="hover:bg-stone-50 transition-colors"
-                            >
-                              <td className="p-4">
-                                <p className="font-bold text-sm md:text-base" style={{ color: THEME.text }}>{dim.title}</p>
-                                <div className="mt-2 w-full bg-stone-200 rounded-full h-1.5 overflow-hidden">
-                                  <motion.div 
-                                    className="h-full rounded-full" style={{ backgroundColor: THEME.red }}
-                                    initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 1.2, duration: 1 }}
-                                  />
-                                </div>
-                              </td>
-                              <td className="p-4 text-center font-medium" style={{ color: THEME.textMuted }}>
-                                {dim.rawScore} <span className="text-xs">/ {dim.maxRawScore}</span>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: THEME.brownLight, color: THEME.brown }}>
-                                  {dim.weight}%
-                                </span>
-                              </td>
-                              <td className="p-4 text-right font-extrabold text-lg" style={{ color: THEME.red }}>
-                                {dim.weightedScore.toFixed(1)}
-                              </td>
-                            </motion.tr>
-                          );
-                        })}
-                      </tbody>
-                      <tfoot className="bg-stone-50 border-t" style={{ borderColor: THEME.brownLight }}>
-                        <tr>
-                          <td colSpan={3} className="p-4 text-right font-bold" style={{ color: THEME.text }}>คะแนนถ่วงน้ำหนักรวม (Total Score)</td>
-                          <td className="p-4 text-right font-extrabold text-2xl" style={{ color: THEME.red }}>{Math.round(percent)}</td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        )}
-
-        {/* ──────── 4. Info & Action Buttons ──────── */}
-        <div className="container mx-auto max-w-4xl px-4 mt-8 mb-12">
+          {/* 2. MIDDLE SECTION: Detailed Description */}
           {!hasNoData && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} className="mb-8 p-4 rounded-xl border flex items-start gap-3 bg-white" style={{ borderColor: THEME.brownLight }}>
-              <Info className="w-5 h-5 shrink-0 mt-0.5" style={{ color: THEME.brown }} />
-              <p className="text-sm leading-relaxed" style={{ color: THEME.textMuted }}>
-                <strong>หมายเหตุ:</strong> คะแนนสุทธิคำนวณจาก (คะแนนดิบ ÷ คะแนนเต็มของมิตินั้น) × สัดส่วนน้ำหนัก % ซึ่งสะท้อนความพร้อมของชุมชนในแต่ละด้านอย่างเป็นระบบ
-              </p>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
+              className="bg-white rounded-[2rem] shadow-sm border border-stone-200 p-8 md:p-12 text-center"
+            >
+              <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-6">รายละเอียดผลการประเมิน</h2>
+              <div className="max-w-3xl mx-auto space-y-4">
+                <p className="text-stone-600 leading-relaxed text-sm md:text-base">
+                  (รายละเอียดผลการประเมิน... รอข้อความเพิ่มเติมสำหรับ {levelData.thaiName})
+                </p>
+              </div>
             </motion.div>
           )}
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* 3. BOTTOM SECTION: Spider Chart */}
+          {!hasNoData && dimensions.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }}
+              className="bg-white rounded-[2rem] shadow-sm border border-stone-200 p-8 md:p-12 text-center"
+            >
+              <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-8">วิเคราะห์ศักยภาพรายมิติ</h2>
+              <div className="w-full max-w-3xl mx-auto aspect-square flex items-center justify-center">
+                <RadarChart dimensions={dimensions} fillColor={THEME.red} strokeColor={THEME.brown} />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Action Buttons */}
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
+          >
             <Link to="/assessment" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full gap-2 text-base shadow-sm hover:bg-stone-50" style={{ borderColor: THEME.brown, color: THEME.brown }}>
-                <RefreshCw className="h-4 w-4" /> ทำแบบประเมินอีกครั้ง
+              <Button variant="outline" size="lg" className="w-full h-12 md:h-14 px-8 text-base shadow-sm border-stone-200 hover:bg-stone-50 text-stone-700 rounded-full font-medium">
+                <RefreshCw className="h-4 w-4 mr-2" /> ทำแบบประเมินอีกครั้ง
               </Button>
             </Link>
             <Link to="/" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full gap-2 text-base shadow-md hover:opacity-90" style={{ backgroundColor: THEME.red, color: 'white' }}>
-                <Home className="h-4 w-4" /> กลับหน้าหลัก
+              <Button size="lg" className="w-full h-12 md:h-14 px-8 text-base shadow-md bg-red-700 hover:bg-red-800 text-white rounded-full font-medium">
+                <Home className="h-4 w-4 mr-2" /> กลับหน้าหลัก
               </Button>
             </Link>
           </motion.div>
-        </div>
 
+        </div>
       </main>
       <Footer />
     </>
