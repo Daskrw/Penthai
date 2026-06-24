@@ -143,12 +143,8 @@ const Assessment = () => {
   /* ---------- handlers ---------- */
 
   const handleStart = useCallback(() => {
-    if (!user) {
-      setShowLoginModal(true);
-      return;
-    }
     setShowPrivacyModal(true);
-  }, [user]);
+  }, []);
 
   const handleAccept = useCallback(async () => {
     setIsLoading(true);

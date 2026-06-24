@@ -106,7 +106,7 @@ export default function AssessmentQuiz() {
 
   // ─── Fetch form ──────────────────────────────────────────────
   useEffect(() => {
-    if (!formId || !user) return;
+    if (!formId) return;
 
     const fetchForm = async () => {
       setLoadingForm(true);
@@ -236,7 +236,7 @@ export default function AssessmentQuiz() {
 
   // ─── Submit ──────────────────────────────────────────────────
   const handleSubmit = useCallback(async () => {
-    if (!form || !user) return;
+    if (!form) return;
     setSubmitting(true);
 
     try {
@@ -291,7 +291,7 @@ export default function AssessmentQuiz() {
         .from('assessment_responses')
         .insert({
           form_id: form.id,
-          user_id: user.id,
+          user_id: user?.id || null,
           total_score: Math.round(totalWeightedScore),
           max_possible_score: 100,
           score_percent: totalWeightedScore,
