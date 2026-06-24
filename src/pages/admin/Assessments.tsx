@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardCheck, Edit3, Loader2, BarChart2, Eye, Save,
-  ChevronDown, ChevronUp, Users, Settings, FileText
+  ChevronDown, ChevronUp, Users, Settings, FileText, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -445,6 +445,18 @@ function ResponsesViewerTab({ formId }: { formId: string }) {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผลการประเมินนี้? การกระทำนี้ไม่สามารถย้อนกลับได้")) return;
+    try {
+      const { error } = await supabase.from("assessment_responses").delete().eq("id", id);
+      if (error) throw error;
+      toast({ title: "ลบผลการประเมินสำเร็จ" });
+      fetchResponses();
+    } catch (err: any) {
+      toast({ title: "เกิดข้อผิดพลาด", description: err.message, variant: "destructive" });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -505,14 +517,24 @@ function ResponsesViewerTab({ formId }: { formId: string }) {
                     </TableCell>
                     <TableCell>{getLevelBadge(r.result_level)}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1"
-                        onClick={() => setSelectedResponse(r.id)}
-                      >
-                        <Eye className="h-3.5 w-3.5" /> ดู
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => setSelectedResponse(r.id)}
+                        >
+                          <Eye className="h-3.5 w-3.5" /> ดู
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleDelete(r.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" /> ลบ
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
