@@ -397,10 +397,20 @@ const AssessmentResult = () => {
               className="bg-white rounded-[2rem] shadow-sm border border-stone-200 p-8 md:p-12 text-center"
             >
               <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-6">รายละเอียดผลการประเมิน</h2>
-              <div className="max-w-3xl mx-auto space-y-4">
-                <p className="text-stone-600 leading-relaxed text-sm md:text-base">
-                  (รายละเอียดผลการประเมิน... รอข้อความเพิ่มเติมสำหรับ {levelData.thaiName})
-                </p>
+              <div className="max-w-4xl mx-auto space-y-4 text-left md:text-center">
+                {levelData.detailedDescription ? (
+                  levelData.detailedDescription.split('\n').map((paragraph, idx) => (
+                    paragraph.trim() !== '' && (
+                      <p key={idx} className="text-stone-600 leading-relaxed text-sm md:text-base md:text-justify text-left">
+                        {paragraph}
+                      </p>
+                    )
+                  ))
+                ) : (
+                  <p className="text-stone-600 leading-relaxed text-sm md:text-base">
+                    {levelData.description}
+                  </p>
+                )}
               </div>
             </motion.div>
           )}
