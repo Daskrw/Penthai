@@ -342,13 +342,12 @@ const AssessmentResult = () => {
       <Navbar />
       <main className="min-h-screen font-prompt bg-[#FAFAFA] pb-20">
         
-        <div className="container mx-auto max-w-5xl px-4 py-8 md:py-16 space-y-8">
-          
-          {/* 1. TOP SECTION: Hero Result */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-            className="bg-white rounded-[2rem] shadow-sm border border-stone-200 p-8 md:p-12 overflow-hidden"
-          >
+        {/* 1. TOP SECTION: Hero Result (Full Width) */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+          className="w-full bg-white border-b border-stone-200 py-12 md:py-20 px-4"
+        >
+          <div className="container mx-auto max-w-6xl">
             {hasNoData ? (
               <div className="text-center py-8">
                 <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-700" />
@@ -361,20 +360,16 @@ const AssessmentResult = () => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
                 {/* Left: Text */}
                 <div className="text-center md:text-left space-y-6">
-                  <h1 className="text-3xl md:text-5xl font-extrabold text-stone-900 leading-tight">
+                  <h1 className="text-4xl md:text-6xl font-extrabold text-stone-900 leading-tight">
                     {communityName}
                   </h1>
-                  <div className="inline-block px-6 py-2 rounded-full bg-red-50 border border-red-100">
-                    <p className="text-2xl md:text-3xl font-bold text-red-700">
+                  <div className="inline-block px-8 py-3 rounded-full bg-red-50 border border-red-100">
+                    <p className="text-2xl md:text-4xl font-bold text-red-700">
                       {levelData.thaiName}
                     </p>
-                  </div>
-                  <div className="flex flex-col gap-2 pt-4">
-                    <p className="text-stone-500 text-sm md:text-base font-medium">คะแนนรวม (Total Score)</p>
-                    <p className="text-4xl font-black text-stone-900">{Math.round(response.score_percent ?? 0)} <span className="text-lg text-stone-400 font-medium">/ 100</span></p>
                   </div>
                 </div>
 
@@ -383,13 +378,16 @@ const AssessmentResult = () => {
                   <img 
                     src={levelImage} 
                     alt={levelData.thaiName} 
-                    className="w-full max-w-[320px] md:max-w-[400px] rounded-[2rem] shadow-md object-cover aspect-square" 
+                    className="w-full max-w-[320px] md:max-w-[450px] rounded-[2rem] shadow-xl object-cover aspect-square" 
                   />
                 </div>
               </div>
             )}
-          </motion.div>
+          </div>
+        </motion.div>
 
+        <div className="container mx-auto max-w-5xl px-4 py-8 md:py-16 space-y-8">
+          
           {/* 2. MIDDLE SECTION: Detailed Description */}
           {!hasNoData && (
             <motion.div 
