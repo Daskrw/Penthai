@@ -372,13 +372,16 @@ const AssessmentResult = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
                 {/* Left: Text */}
-                <div className="text-center md:text-left space-y-6">
-                  <h1 className="text-4xl md:text-6xl font-extrabold text-stone-900 leading-tight">
+                <div className="text-center md:text-left space-y-4">
+                  <h1 className="text-4xl md:text-6xl font-extrabold text-stone-900 leading-tight mb-2">
                     {communityName}
                   </h1>
+                  <p className="text-lg md:text-xl text-stone-600 font-medium">
+                    ขอแสดงความยินดี ชุมชนของท่านได้รับการประเมินอยู่ในระดับ
+                  </p>
                   <div className="inline-block px-8 py-3 rounded-full bg-red-50 border border-red-100">
-                    <p className="text-xl md:text-2xl font-bold text-red-700">
-                      ขอแสดงความยินดี ชุมชนของท่านได้รับการประเมินอยู่ในระดับ "{levelData.thaiName}"
+                    <p className="text-2xl md:text-4xl font-bold text-red-700">
+                      {levelData.thaiName}
                     </p>
                   </div>
                 </div>
