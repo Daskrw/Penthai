@@ -426,7 +426,7 @@ const AssessmentResult = () => {
                 {levelData.detailedDescription ? (
                   levelData.detailedDescription.split('\n').map((paragraph, idx) => (
                     paragraph.trim() !== '' && (
-                      <p key={idx} className="text-stone-600 leading-relaxed text-sm md:text-base md:text-justify text-left">
+                      <p key={idx} className="text-stone-600 leading-relaxed text-sm md:text-base text-left">
                         {paragraph}
                       </p>
                     )
