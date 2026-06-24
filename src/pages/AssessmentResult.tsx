@@ -377,8 +377,8 @@ const AssessmentResult = () => {
                     {communityName}
                   </h1>
                   <div className="inline-block px-8 py-3 rounded-full bg-red-50 border border-red-100">
-                    <p className="text-2xl md:text-4xl font-bold text-red-700">
-                      {levelData.thaiName}
+                    <p className="text-xl md:text-2xl font-bold text-red-700">
+                      ขอแสดงความยินดี ชุมชนของท่านได้รับการประเมินอยู่ในระดับ "{levelData.thaiName}"
                     </p>
                   </div>
                 </div>
